@@ -10,11 +10,11 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../Item.dart';
 
 class IndicatorActivity extends StatefulWidget {
-  final String title;
+  final String? title;
 
-  final Widget header;
+  final Widget? header;
 
-  final Widget footer;
+  final Widget? footer;
 
   final bool enableOverScroll;
   final bool reverse;
@@ -22,20 +22,19 @@ class IndicatorActivity extends StatefulWidget {
   IndicatorActivity(
       {this.title,
       this.header,
-      this.reverse: false,
+      this.reverse = false,
       this.footer,
-      this.enableOverScroll: true});
+      this.enableOverScroll = true});
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _IndicatorActivityState();
   }
 }
 
 class _IndicatorActivityState extends State<IndicatorActivity> {
   List<Widget> items = [];
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   void _init() {
     for (int i = 0; i < 15; i++) {
@@ -45,16 +44,12 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
     }
   }
 
-  ScrollController _scrollController;
+  ScrollController? _scrollController;
 
   @override
   void initState() {
-    // TODO: implement initState
     _scrollController = new ScrollController();
     _refreshController = RefreshController();
-    Future.delayed(Duration(milliseconds: 3000)).then((_) {
-//      _jumpTo(0.0);
-    });
     _init();
 
     super.initState();
@@ -62,19 +57,15 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _refreshController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text(widget.title!),
       ),
       body: Builder(
         builder: (c) {

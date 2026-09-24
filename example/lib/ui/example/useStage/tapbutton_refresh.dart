@@ -5,7 +5,6 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 /*
@@ -17,7 +16,6 @@ class TapButtonRefreshExample extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _TapButtonRefreshExampleState();
   }
 }
@@ -45,26 +43,13 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
         Text("没数据,请点击按钮刷新")
       ],
     );
-    /* second way
-    return ListView(
-      children: [
-        Image.asset(
-          "images/empty.png",
-          fit: BoxFit.cover,
-        )
-      ],
-      physics: BouncingScrollPhysics(),
-      cacheExtent: 100.0,
-    );
-     */
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _refreshController.headerMode.addListener(() {
-      if (_refreshController.headerMode.value == RefreshStatus.idle) {
+    _refreshController.headerMode!.addListener(() {
+      if (_refreshController.headerMode!.value == RefreshStatus.idle) {
         Future.delayed(const Duration(milliseconds: 20)).then((value) {
           _enablePullDown = false;
           setState(() {});
@@ -75,7 +60,6 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       body: SmartRefresher(
         controller: _refreshController,

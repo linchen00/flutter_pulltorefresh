@@ -9,9 +9,7 @@
 // found in the LICENSE file.
 
 import 'package:example/other/refresh_recordable_listview.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 enum _ReorderableListType {
@@ -26,7 +24,7 @@ enum _ReorderableListType {
 }
 
 class ReorderableListDemo extends StatefulWidget {
-  const ReorderableListDemo({Key key}) : super(key: key);
+  const ReorderableListDemo({Key? key}) : super(key: key);
 
   static const String routeName = '/material/reorderable-list';
 
@@ -39,16 +37,16 @@ class _ListItem {
 
   final String value;
 
-  bool checkState;
+  bool? checkState;
 }
 
 class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey =
       GlobalKey<ScaffoldState>();
-  PersistentBottomSheetController<void> _bottomSheet;
+  PersistentBottomSheetController? _bottomSheet;
   RefreshController _refreshController = RefreshController();
-  _ReorderableListType _itemType = _ReorderableListType.threeLine;
-  bool _reverse = false;
+  _ReorderableListType? _itemType = _ReorderableListType.threeLine;
+  bool? _reverse = false;
   bool _reverseSort = false;
   final List<_ListItem> _items = <String>[
     'A',
@@ -67,81 +65,79 @@ class _ListDemoState extends State<ReorderableListDemo> {
     'N',
   ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
 
-  void changeItemType(_ReorderableListType type) {
+  void changeItemType(_ReorderableListType? type) {
     if (mounted)
       setState(() {
         _itemType = type;
       });
     // Rebuild the bottom sheet to reflect the selected list view.
     if (mounted)
-      _bottomSheet?.setState(() {
+      _bottomSheet!.setState!(() {
         // Trigger a rebuild.
       });
     // Close the bottom sheet to give the user a clear view of the list.
-    _bottomSheet?.close();
+    _bottomSheet!.close();
   }
 
-  void changeReverse(bool newValue) {
+  void changeReverse(bool? newValue) {
     if (mounted)
       setState(() {
         _reverse = newValue;
       });
     // Rebuild the bottom sheet to reflect the selected list view.
     if (mounted)
-      _bottomSheet?.setState(() {
+      _bottomSheet!.setState!(() {
         // Trigger a rebuild.
       });
     // Close the bottom sheet to give the user a clear view of the list.
-    _bottomSheet?.close();
+    _bottomSheet!.close();
   }
 
   void _showConfigurationSheet() {
     if (mounted)
       setState(() {
-        _bottomSheet = scaffoldKey.currentState
-            .showBottomSheet<void>((BuildContext bottomSheetContext) {
+        _bottomSheet = scaffoldKey.currentState!
+            .showBottomSheet((BuildContext bottomSheetContext) {
           return DecoratedBox(
             decoration: const BoxDecoration(
               border: Border(top: BorderSide(color: Colors.black26)),
             ),
-            child: ListView(
-              shrinkWrap: true,
-              primary: false,
-              children: <Widget>[
-                CheckboxListTile(
-                  dense: true,
-                  title: const Text('Reverse'),
-                  value: _reverse,
-                  onChanged: changeReverse,
-                ),
-                RadioListTile<_ReorderableListType>(
-                  dense: true,
-                  title: const Text('Horizontal Avatars'),
-                  value: _ReorderableListType.horizontalAvatar,
-                  groupValue: _itemType,
-                  onChanged: changeItemType,
-                ),
-                RadioListTile<_ReorderableListType>(
-                  dense: true,
-                  title: const Text('Vertical Avatars'),
-                  value: _ReorderableListType.verticalAvatar,
-                  groupValue: _itemType,
-                  onChanged: changeItemType,
-                ),
-                RadioListTile<_ReorderableListType>(
-                  dense: true,
-                  title: const Text('Three-line'),
-                  value: _ReorderableListType.threeLine,
-                  groupValue: _itemType,
-                  onChanged: changeItemType,
-                ),
-              ],
+            child: RadioGroup<_ReorderableListType>(
+              groupValue: _itemType,
+              onChanged: changeItemType,
+              child: ListView(
+                shrinkWrap: true,
+                primary: false,
+                children: <Widget>[
+                  CheckboxListTile(
+                    dense: true,
+                    title: const Text('Reverse'),
+                    value: _reverse,
+                    onChanged: changeReverse,
+                  ),
+                  RadioListTile<_ReorderableListType>(
+                    dense: true,
+                    title: const Text('Horizontal Avatars'),
+                    value: _ReorderableListType.horizontalAvatar,
+                  ),
+                  RadioListTile<_ReorderableListType>(
+                    dense: true,
+                    title: const Text('Vertical Avatars'),
+                    value: _ReorderableListType.verticalAvatar,
+                  ),
+                  RadioListTile<_ReorderableListType>(
+                    dense: true,
+                    title: const Text('Three-line'),
+                    value: _ReorderableListType.threeLine,
+                  ),
+                ],
+              ),
             ),
           );
         });
 
         // Garbage collect the bottom sheet when it closes.
-        _bottomSheet.closed.whenComplete(() {
+        _bottomSheet!.closed.whenComplete(() {
           if (mounted) {
             setState(() {
               _bottomSheet = null;
@@ -151,18 +147,20 @@ class _ListDemoState extends State<ReorderableListDemo> {
       });
   }
 
-  Widget buildListTile(_ListItem item) {
+  Widget? buildListTile(_ListItem item) {
     const Widget secondary = Text(
       'Even more additional list item information appears on line three.',
     );
-    Widget listTile;
+    Widget? listTile;
     switch (_itemType) {
+      case null:
+        break;
       case _ReorderableListType.threeLine:
         listTile = CheckboxListTile(
           key: Key(item.value),
           isThreeLine: true,
           value: item.checkState ?? false,
-          onChanged: (bool newValue) {
+          onChanged: (bool? newValue) {
             if (mounted)
               setState(() {
                 item.checkState = newValue;
@@ -228,7 +226,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
                   : Icons.more_vert,
             ),
             tooltip: 'Show menu',
-            onPressed: _bottomSheet == null ? _showConfigurationSheet : null,
+            onPressed: _showConfigurationSheet,
           ),
         ],
       ),
@@ -238,7 +236,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text('Header of the list',
-                      style: Theme.of(context).textTheme.headline1))
+                      style: Theme.of(context).textTheme.displayLarge))
               : null,
           onReorder: _onReorder,
           reverse: _reverse,
@@ -246,7 +244,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
               ? Axis.horizontal
               : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          children: _items.map<Widget>(buildListTile).toList(),
+          children: _items.map<Widget?>(buildListTile).toList(),
           refreshController: _refreshController,
         ),
       ),

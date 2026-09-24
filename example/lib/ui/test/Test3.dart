@@ -1,44 +1,41 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Test3 extends StatefulWidget {
-  Test3({Key key}) : super(key: key);
+  Test3({Key? key}) : super(key: key);
 
   @override
   Test3State createState() => Test3State();
 }
 
 class Test3State extends State<Test3> with TickerProviderStateMixin {
-//  RefreshMode  refreshing = RefreshMode.idle;
-//  LoadMode loading = LoadMode.idle;
   ValueNotifier<double> topOffsetLis = ValueNotifier(0.0);
   ValueNotifier<double> bottomOffsetLis = ValueNotifier(0.0);
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   List<Widget> data = [];
 
   void _getDatas() {
     data.add(Row(
       children: <Widget>[
-        FlatButton(
+        TextButton(
             onPressed: () {
               _refreshController
                   .requestRefresh(needCallback: false)
-                  .then((value) async {
+                  ?.then((value) async {
                 print("requestRefresh");
                 await Future.delayed(const Duration(milliseconds: 5000));
                 _refreshController.refreshCompleted();
               });
             },
             child: Text("请求刷新")),
-        FlatButton(
+        TextButton(
             onPressed: () {
               _refreshController
                   .requestLoading(needCallback: false)
-                  .then((value) async {
+                  ?.then((value) async {
                 print("requestLoading");
                 await Future.delayed(const Duration(milliseconds: 5000));
                 _refreshController.loadComplete();
@@ -72,52 +69,6 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    // TODO: implement initState
-    // for test #68 true-> false ->true
-//    Future.delayed(Duration(milliseconds: 3000), () {
-//      _enablePullDown = false;
-//      _enablePullUp = false;
-//      if (mounted) setState(() {});
-//    });
-//    Future.delayed(Duration(milliseconds: 6000), () {
-//      _enablePullDown = true;
-//      _enablePullUp = true;
-//      if (mounted) setState(() {});
-//    });
-
-//    // for test #68 false-> true ->false
-//    Future.delayed(Duration(milliseconds: 3000),(){
-//      _enablePullDown = false;
-//      _enablePullUp = true;
-//    if(mounted)
-//      setState(() {
-//
-//      });
-//    });
-//    Future.delayed(Duration(milliseconds: 6000),(){
-//      _enablePullDown = true;
-//      _enablePullUp = false;
-//    if(mounted)
-//      setState(() {
-//
-//      });
-//    });
-//    Future.delayed(Duration(milliseconds: 3000),(){
-//      _enablePullDown = true;
-//      _enablePullUp = false;
-//    if(mounted)
-//      setState(() {
-//
-//      });
-//    });
-//    Future.delayed(Duration(milliseconds: 6000),(){
-//      _enablePullDown = false;
-//      _enablePullUp = true;
-//    if(mounted)
-//      setState(() {
-//
-//      });
-//    });
     _getDatas();
     _refreshController = RefreshController(
         initialRefresh: false, initialLoadStatus: LoadStatus.noMore);
@@ -126,13 +77,11 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
   }
 
@@ -170,10 +119,6 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
           ));
           if (mounted) setState(() {});
           _refreshController.refreshCompleted();
-//        Future.delayed(const Duration(milliseconds: 2009)).then((val) {
-//          data.add(Card());
-//
-//        });
         },
         child: CustomScrollView(
           slivers: <Widget>[
@@ -195,30 +140,28 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
 }
 
 class CirclePainter extends CustomClipper<Path> {
-  final double offset;
-  final bool up;
+  final double? offset;
+  final bool? up;
 
   CirclePainter({this.offset, this.up});
 
   @override
   Path getClip(Size size) {
-    // TODO: implement getClip
     final path = Path();
-    if (!up) path.moveTo(0.0, size.height);
+    if (!up!) path.moveTo(0.0, size.height);
     path.cubicTo(
         0.0,
-        up ? 0.0 : size.height,
+        up! ? 0.0 : size.height,
         size.width / 2,
-        up ? offset * 2.3 : size.height - offset * 2.3,
+        up! ? offset! * 2.3 : size.height - offset! * 2.3,
         size.width,
-        up ? 0.0 : size.height);
+        up! ? 0.0 : size.height);
     path.close();
     return path;
   }
 
   @override
   bool shouldReclip(CustomClipper oldClipper) {
-    // TODO: implement shouldReclip
     return oldClipper != this;
   }
 }

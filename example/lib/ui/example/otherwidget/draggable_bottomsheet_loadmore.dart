@@ -4,7 +4,6 @@
  * Time:  2019-07-03 17:24
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -16,7 +15,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 class DraggableLoadingBottomSheet extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _DraggableLoadingBottomSheetState();
   }
 }
@@ -29,20 +27,18 @@ class _DraggableLoadingBottomSheetState
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     for (int i = 0; i < 15; i++) items.add("数据");
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       appBar: AppBar(
         title: const Text('DraggableScrollableSheet'),
       ),
       body: Container(
-        child: RaisedButton(
+        child: ElevatedButton(
           onPressed: () {
             showModalBottomSheet(
                 backgroundColor: Colors.transparent,

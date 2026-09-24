@@ -4,8 +4,8 @@
  * Time:  2019-07-23 21:09
  */
 import 'package:flutter/material.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 /*
@@ -14,7 +14,7 @@ import 'package:flutter_sticky_header/flutter_sticky_header.dart';
    author page : https://github.com/letsar
  */
 class RefreshStaggeredAndSticky extends StatefulWidget {
-  RefreshStaggeredAndSticky({Key key}) : super(key: key);
+  RefreshStaggeredAndSticky({Key? key}) : super(key: key);
 
   @override
   RefreshStaggeredAndStickyState createState() =>
@@ -23,7 +23,7 @@ class RefreshStaggeredAndSticky extends StatefulWidget {
 
 class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
     with TickerProviderStateMixin {
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   List<Widget> data = [];
 
@@ -32,12 +32,12 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
   void _getDatas() {
     data.add(Row(
       children: <Widget>[
-        FlatButton(
+        TextButton(
             onPressed: () {
               _refreshController.requestRefresh();
             },
             child: Text("请求刷新")),
-        FlatButton(
+        TextButton(
             onPressed: () {
               _refreshController.requestLoading();
             },
@@ -69,7 +69,6 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
 
   @override
   void initState() {
-    // TODO: implement initState
     _getDatas();
     _refreshController = RefreshController(initialRefresh: true);
     super.initState();
@@ -77,7 +76,6 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _refreshController.dispose();
     super.dispose();
   }
@@ -120,19 +118,21 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
             : null,
       ));
     }
-    slivers.add(SliverStaggeredGrid.countBuilder(
+    slivers.add(SliverMasonryGrid.count(
       crossAxisCount: 4,
-      itemCount: length,
-      itemBuilder: (BuildContext context, int index) => new Container(
+      childCount: length,
+      itemBuilder: (BuildContext context, int index) => SizedBox(
+        height: index.isEven ? 120 : 60,
+        child: Container(
           color: Colors.green,
           child: new Center(
             child: new CircleAvatar(
               backgroundColor: Colors.white,
               child: new Text('$index'),
             ),
-          )),
-      staggeredTileBuilder: (int index) =>
-          new StaggeredTile.count(2, index.isEven ? 2 : 1),
+          ),
+        ),
+      ),
       mainAxisSpacing: 4.0,
       crossAxisSpacing: 4.0,
     ));

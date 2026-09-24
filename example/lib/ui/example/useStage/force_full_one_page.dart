@@ -18,7 +18,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 class SliverFillEmptySpace extends SingleChildRenderObjectWidget {
   /// Creates a sliver that contains a single box widget.
   SliverFillEmptySpace({
-    Key key,
+    Key? key,
   }) : super(key: key, child: Container());
 
   @override
@@ -29,7 +29,7 @@ class SliverFillEmptySpace extends SingleChildRenderObjectWidget {
 class RenderSliverFillEmptySpace extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a [RenderBox].
   RenderSliverFillEmptySpace({
-    RenderBox child,
+    RenderBox? child,
   }) : super(child: child);
 
   @override
@@ -38,7 +38,7 @@ class RenderSliverFillEmptySpace extends RenderSliverSingleBoxAdapter {
         constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
 
     if (emptySpaceExtent > 0) {
-      child.layout(constraints.asBoxConstraints(maxExtent: emptySpaceExtent),
+      child!.layout(constraints.asBoxConstraints(maxExtent: emptySpaceExtent),
           parentUsesSize: true);
       double childExtent = emptySpaceExtent;
       final double paintedChildSize =
@@ -51,7 +51,7 @@ class RenderSliverFillEmptySpace extends RenderSliverSingleBoxAdapter {
         cacheExtent: cacheExtent,
         maxPaintExtent: childExtent,
       );
-      setChildParentData(child, constraints, geometry);
+      setChildParentData(child!, constraints, geometry!);
     } else {
       geometry = SliverGeometry.zero;
     }
@@ -59,21 +59,21 @@ class RenderSliverFillEmptySpace extends RenderSliverSingleBoxAdapter {
 }
 
 class FillEmptyCustomScrollView extends prefix0.CustomScrollView {
-  final bool enableFillEmpty;
-  const FillEmptyCustomScrollView({
-    Key key,
+  final bool? enableFillEmpty;
+  FillEmptyCustomScrollView({
+    Key? key,
     this.enableFillEmpty,
     Axis scrollDirection = Axis.vertical,
     bool reverse = false,
-    ScrollController controller,
-    bool primary,
-    ScrollPhysics physics,
+    ScrollController? controller,
+    bool? primary,
+    ScrollPhysics? physics,
     bool shrinkWrap = false,
-    Key center,
+    Key? center,
     double anchor = 0.0,
-    double cacheExtent,
+    double? cacheExtent,
     this.slivers = const <Widget>[],
-    int semanticChildCount,
+    int? semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : super(
           key: key,
@@ -85,7 +85,9 @@ class FillEmptyCustomScrollView extends prefix0.CustomScrollView {
           shrinkWrap: shrinkWrap,
           center: center,
           anchor: anchor,
-          cacheExtent: cacheExtent,
+          scrollCacheExtent: cacheExtent == null
+              ? null
+              : ScrollCacheExtent.pixels(cacheExtent),
           semanticChildCount: semanticChildCount,
           dragStartBehavior: dragStartBehavior,
         );
@@ -95,17 +97,16 @@ class FillEmptyCustomScrollView extends prefix0.CustomScrollView {
 
   @override
   List<Widget> buildSlivers(BuildContext context) {
-    if (enableFillEmpty) slivers.add(SliverFillEmptySpace());
+    if (enableFillEmpty!) slivers.add(SliverFillEmptySpace());
     return slivers;
   }
 }
 
 class ForceFullExample extends StatelessWidget {
-  RefreshController _refreshController = RefreshController();
+  final RefreshController _refreshController = RefreshController();
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return SmartRefresher(
       controller: _refreshController,
       enablePullUp: true,
@@ -122,7 +123,7 @@ class ForceFullExample extends StatelessWidget {
       ),
       child: FillEmptyCustomScrollView(
         enableFillEmpty:
-            _refreshController.footerMode.value != LoadStatus.noMore,
+            _refreshController.footerMode!.value != LoadStatus.noMore,
         slivers: <Widget>[
           SliverToBoxAdapter(
             child: Text(

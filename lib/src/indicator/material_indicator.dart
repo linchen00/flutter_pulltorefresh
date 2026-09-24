@@ -4,10 +4,8 @@
  * Time: 2019/5/19 下午9:23
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'
     hide RefreshIndicator, RefreshIndicatorState;
-import 'package:flutter/widgets.dart';
 import '../internals/indicator_wrap.dart';
 import '../smart_refresher.dart';
 
@@ -34,12 +32,12 @@ class MaterialClassicHeader extends RefreshIndicator {
 
   const MaterialClassicHeader({
     Key? key,
-    double height: 80.0,
+    double height = 80.0,
     this.semanticsLabel,
     this.semanticsValue,
     this.color,
-    double offset: 0,
-    this.distance: 50.0,
+    double offset = 0,
+    this.distance = 50.0,
     this.backgroundColor,
   }) : super(
           key: key,
@@ -50,7 +48,6 @@ class MaterialClassicHeader extends RefreshIndicator {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
 
     return _MaterialClassicHeaderState();
   }
@@ -68,7 +65,6 @@ class _MaterialClassicHeaderState
 
   @override
   void initState() {
-    // TODO: implement initState
     _valueAni = AnimationController(
         vsync: this,
         value: 0.0,
@@ -94,14 +90,12 @@ class _MaterialClassicHeaderState
 
   @override
   void didUpdateWidget(covariant MaterialClassicHeader oldWidget) {
-    // TODO: implement didUpdateWidget
-    _position = Scrollable.of(context)!.position;
+    _position = Scrollable.of(context).position;
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget buildContent(BuildContext context, RefreshStatus? mode) {
-    // TODO: implement buildContent
     return _buildIndicator(widget.backgroundColor ?? Colors.white);
   }
 
@@ -113,7 +107,7 @@ class _MaterialClassicHeaderState
           alignment: Alignment.topCenter,
           child: RefreshProgressIndicator(
             semanticsLabel: widget.semanticsLabel ??
-                MaterialLocalizations?.of(context)
+                MaterialLocalizations.of(context)
                     .refreshIndicatorSemanticLabel,
             semanticsValue: widget.semanticsValue,
             value: floating ? null : _valueAni.value,
@@ -128,7 +122,6 @@ class _MaterialClassicHeaderState
 
   @override
   void onOffsetChange(double offset) {
-    // TODO: implement onOffsetChange
     if (!floating) {
       _valueAni.value = offset / configuration!.headerTriggerDistance;
       _positionController.value = offset / configuration!.headerTriggerDistance;
@@ -137,7 +130,6 @@ class _MaterialClassicHeaderState
 
   @override
   void onModeChange(RefreshStatus? mode) {
-    // TODO: implement onModeChange
     if (mode == RefreshStatus.refreshing) {
       _positionController.value = widget.distance / widget.height;
       _scaleFactor.value = 1;
@@ -147,7 +139,6 @@ class _MaterialClassicHeaderState
 
   @override
   void resetValue() {
-    // TODO: implement resetValue
     _scaleFactor.value = 1.0;
     _positionController.value = 0.0;
     _valueAni.value = 0.0;
@@ -157,11 +148,11 @@ class _MaterialClassicHeaderState
   @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
-    _position = Scrollable.of(context)!.position;
+    _position = Scrollable.of(context).position;
     _valueColor = _positionController.drive(
       ColorTween(
-        begin: (widget.color ?? theme.primaryColor).withOpacity(0.0),
-        end: (widget.color ?? theme.primaryColor).withOpacity(1.0),
+        begin: (widget.color ?? theme.primaryColor).withValues(alpha: 0.0),
+        end: (widget.color ?? theme.primaryColor).withValues(alpha: 1.0),
       ).chain(
           CurveTween(curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit))),
     );
@@ -170,19 +161,16 @@ class _MaterialClassicHeaderState
 
   @override
   Future<void> readyToRefresh() {
-    // TODO: implement readyToRefresh
     return _positionController.animateTo(widget.distance / widget.height);
   }
 
   @override
   Future<void> endRefresh() {
-    // TODO: implement endRefresh
     return _scaleFactor.animateTo(0.0);
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _valueAni.dispose();
     _scaleFactor.dispose();
     _positionController.dispose();
@@ -195,10 +183,10 @@ class WaterDropMaterialHeader extends MaterialClassicHeader {
   const WaterDropMaterialHeader({
     Key? key,
     String? semanticsLabel,
-    double distance: 60.0,
-    double offset: 0,
+    double distance = 60.0,
+    double offset = 0,
     String? semanticsValue,
-    Color color: Colors.white,
+    Color color = Colors.white,
     Color? backgroundColor,
   }) : super(
             key: key,
@@ -212,7 +200,6 @@ class WaterDropMaterialHeader extends MaterialClassicHeader {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _WaterDropMaterialHeaderState();
   }
 }
@@ -223,7 +210,6 @@ class _WaterDropMaterialHeaderState extends _MaterialClassicHeaderState {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _bezierController = AnimationController(
         vsync: this,
@@ -243,13 +229,12 @@ class _WaterDropMaterialHeaderState extends _MaterialClassicHeaderState {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     final ThemeData theme = Theme.of(context);
     _valueColor = _positionController.drive(
       ColorTween(
-        begin: (widget.color ?? theme.primaryColor).withOpacity(0.0),
-        end: (widget.color ?? theme.primaryColor).withOpacity(1.0),
+        begin: (widget.color ?? theme.primaryColor).withValues(alpha: 0.0),
+        end: (widget.color ?? theme.primaryColor).withValues(alpha: 1.0),
       ).chain(
           CurveTween(curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit))),
     );
@@ -257,7 +242,6 @@ class _WaterDropMaterialHeaderState extends _MaterialClassicHeaderState {
 
   @override
   Future<void> readyToRefresh() {
-    // TODO: implement readyToRefresh
     _bezierController!.value = 1.01;
     _showWater = true;
     _bezierController!.animateTo(1.5,
@@ -272,28 +256,24 @@ class _WaterDropMaterialHeaderState extends _MaterialClassicHeaderState {
 
   @override
   Future<void> endRefresh() {
-    // TODO: implement endRefresh
     _showWater = false;
     return super.endRefresh();
   }
 
   @override
   void resetValue() {
-    // TODO: implement resetValue
     _bezierController!.reset();
     super.resetValue();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _bezierController!.dispose();
     super.dispose();
   }
 
   @override
   void onOffsetChange(double offset) {
-    // TODO: implement onOffsetChange
     offset = offset > 80.0 ? 80.0 : offset;
 
     if (!floating) {
@@ -308,7 +288,6 @@ class _WaterDropMaterialHeaderState extends _MaterialClassicHeaderState {
 
   @override
   Widget buildContent(BuildContext context, RefreshStatus? mode) {
-    // TODO: implement buildContent
     return Container(
       child: Stack(
         children: <Widget>[
@@ -349,7 +328,6 @@ class _WaterPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // TODO: implement paint
     final Paint paint = Paint();
     paint.color = color!;
     final Path path = Path();
@@ -365,7 +343,6 @@ class _WaterPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_WaterPainter oldDelegate) {
-    // TODO: implement shouldRepaint
     return this != oldDelegate || offset != oldDelegate.offset;
   }
 }
@@ -380,7 +357,6 @@ class _BezierPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // TODO: implement paint
     final double middleX = size.width / 2;
     final Paint paint = Paint();
     paint.color = color!;
@@ -411,7 +387,6 @@ class _BezierPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BezierPainter oldDelegate) {
-    // TODO: implement shouldRepaint
     return this != oldDelegate || oldDelegate.value != value;
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert' show json;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as HTTP;
@@ -11,14 +12,14 @@ class Test2 extends StatefulWidget {
 }
 
 class _Test2State extends State<Test2> with TickerProviderStateMixin {
-  RefreshController _controller;
+  late RefreshController _controller;
   int indexPage = 0;
-  List<String> data = [];
+  List<String?> data = [];
 
   void _fetch() {
     HTTP
-        .get(
-            'https://gank.io/api/v2/data/category/Girl/type/Girl/page/$indexPage/count/10')
+        .get(Uri.parse(
+            'https://gank.io/api/v2/data/category/Girl/type/Girl/page/$indexPage/count/10'))
         .then((HTTP.Response response) {
       Map map = json.decode(response.body);
       return map["data"];
@@ -38,7 +39,6 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
   void _onRefresh() {
     Future.delayed(const Duration(milliseconds: 2009)).then((val) {
       _controller.refreshCompleted();
-//                refresher.sendStatus(RefreshStatus.completed);
     });
   }
 
@@ -55,9 +55,6 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
       ),
       onTap: () {
         print("tap");
-//        _controller.requestRefresh().then((_){
-//          print("request complete");
-//        });
         _controller.requestRefresh(needMove: false)?.then((_) {
           print("request complete");
         });
@@ -65,15 +62,8 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
     );
   }
 
-  void _onOffsetCallback(bool isUp, double offset) {
-    // if you want change some widgets state ,you should rewrite the callback
-    if (isUp) {
-    } else {}
-  }
-
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controller = RefreshController(initialLoadStatus: LoadStatus.failed);
     _fetch();
@@ -81,7 +71,6 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
   }
 
@@ -106,7 +95,7 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
 }
 
 class Item extends StatefulWidget {
-  final String url;
+  final String? url;
 
   Item({this.url});
 
@@ -117,12 +106,11 @@ class Item extends StatefulWidget {
 class _ItemState extends State<Item> {
   @override
   Widget build(BuildContext context) {
-    if (widget.url == null) return Container();
     return Container(
       child: FadeInImage(
         placeholder: AssetImage("images/empty.png"),
         image: NetworkImage(
-          widget.url,
+          widget.url!,
         ),
       ),
     );
@@ -130,7 +118,6 @@ class _ItemState extends State<Item> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 }

@@ -17,7 +17,6 @@ class RefreshWithEmptyView extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _RefreshWithEmptyViewState();
   }
 }
@@ -44,24 +43,10 @@ class _RefreshWithEmptyViewState extends State<RefreshWithEmptyView> {
         Text("没数据,请下拉刷新")
       ],
     );
-    /* second way
-    return ListView(
-      children: [
-        Image.asset(
-          "images/empty.png",
-          fit: BoxFit.cover,
-        )
-      ],
-      physics: BouncingScrollPhysics(),
-      cacheExtent: 100.0,
-    );
-
-     */
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return SmartRefresher(
       controller: _refreshController,
       enablePullUp: data.length != 0,

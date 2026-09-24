@@ -1,25 +1,21 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_spinkit/src/utils.dart';
 
 class SpinKitFadingCircle extends StatefulWidget {
   SpinKitFadingCircle({
-    Key key,
+    Key? key,
     this.color,
     this.size = 50.0,
     this.itemBuilder,
     this.animationController,
     this.duration = const Duration(milliseconds: 1200),
-  })  : assert(
-            !(itemBuilder is IndexedWidgetBuilder && color is Color) &&
-                !(itemBuilder == null && color == null),
+  })  : assert(!(color is Color) && !(itemBuilder == null && color == null),
             'You should specify either a itemBuilder or a color'),
-        assert(size != null),
         super(key: key);
 
-  final Color color;
+  final Color? color;
   final double size;
-  final IndexedWidgetBuilder itemBuilder;
-  final AnimationController animationController;
+  final IndexedWidgetBuilder? itemBuilder;
+  final AnimationController? animationController;
   final Duration duration;
 
   @override
@@ -32,13 +28,10 @@ class _SpinKitFadingCircleState extends State<SpinKitFadingCircle>
   void initState() {
     super.initState();
 
-//    _controller = AnimationController(vsync: this, duration: widget.duration)
-//      ..repeat();
   }
 
   @override
   void dispose() {
-//    _controller.dispose();
     super.dispose();
   }
 
@@ -67,7 +60,7 @@ class _SpinKitFadingCircleState extends State<SpinKitFadingCircle>
     );
   }
 
-  Widget _circle(int i, [double delay]) {
+  Widget _circle(int i, [double? delay]) {
     final _size = widget.size * 0.15, _position = widget.size * .5;
 
     return Positioned.fill(
@@ -78,8 +71,15 @@ class _SpinKitFadingCircleState extends State<SpinKitFadingCircle>
         child: Align(
           alignment: Alignment.center,
           child: FadeTransition(
-            opacity: DelayTween(begin: 0.0, end: 1.0, delay: delay)
-                .animate(widget.animationController),
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                parent: widget.animationController!,
+                curve: Interval(
+                  (1.0 + (delay ?? 0.0)).clamp(0.0, 1.0).toDouble(),
+                  1.0,
+                ),
+              ),
+            ),
             child: SizedBox.fromSize(
               size: Size.square(_size),
               child: _itemBuilder(i - 1),
@@ -91,13 +91,6 @@ class _SpinKitFadingCircleState extends State<SpinKitFadingCircle>
   }
 
   Widget _itemBuilder(int index) {
-    return widget.itemBuilder != null
-        ? widget.itemBuilder(context, index)
-        : DecoratedBox(
-            decoration: BoxDecoration(
-              color: widget.color,
-              shape: BoxShape.circle,
-            ),
-          );
+    return widget.itemBuilder!(context, index);
   }
 }

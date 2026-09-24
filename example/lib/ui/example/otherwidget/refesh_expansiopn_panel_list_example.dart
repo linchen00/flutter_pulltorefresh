@@ -4,15 +4,12 @@
  * Time:  2019-07-01 20:48
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class RefreshExpansionPanelList extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return RefreshExpansionPanelListState();
   }
 }
@@ -44,11 +41,11 @@ class RefreshExpansionPanelListState extends State<RefreshExpansionPanelList> {
         return ExpansionPanel(
           headerBuilder: (BuildContext context, bool isExpanded) {
             return ListTile(
-              title: Text(item.headerValue),
+              title: Text(item.headerValue!),
             );
           },
           body: ListTile(
-              title: Text(item.headerValue),
+              title: Text(item.headerValue!),
               subtitle: Text('To delete this panel, tap the trash can icon'),
               trailing: Icon(Icons.delete),
               onTap: () {
@@ -81,7 +78,7 @@ class Item {
     this.isExpanded = false,
   });
 
-  String expandedValue;
-  String headerValue;
+  String? expandedValue;
+  String? headerValue;
   bool isExpanded;
 }

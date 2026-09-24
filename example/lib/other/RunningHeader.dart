@@ -11,20 +11,18 @@ import 'package:flutter/material.dart'
 class RunningHeader extends RefreshIndicator {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return RunningHeaderState();
   }
 }
 
 class RunningHeaderState extends RefreshIndicatorState<RunningHeader>
     with TickerProviderStateMixin {
-  AnimationController _scaleAnimation;
-  AnimationController _offsetController;
-  Tween<Offset> offsetTween;
+  late AnimationController _scaleAnimation;
+  late AnimationController _offsetController;
+  late Tween<Offset> offsetTween;
 
   @override
   void initState() {
-    // TODO: implement initState
     _scaleAnimation = AnimationController(vsync: this);
     _offsetController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 1000));
@@ -34,7 +32,6 @@ class RunningHeaderState extends RefreshIndicatorState<RunningHeader>
 
   @override
   void onOffsetChange(double offset) {
-    // TODO: implement onOffsetChange
     if (!floating) {
       _scaleAnimation.value = offset / 80.0;
     }
@@ -43,14 +40,12 @@ class RunningHeaderState extends RefreshIndicatorState<RunningHeader>
 
   @override
   void resetValue() {
-    // TODO: implement handleModeChange
     _scaleAnimation.value = 0.0;
     _offsetController.value = 0.0;
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _scaleAnimation.dispose();
     _offsetController.dispose();
     super.dispose();
@@ -58,13 +53,11 @@ class RunningHeaderState extends RefreshIndicatorState<RunningHeader>
 
   @override
   Future<void> endRefresh() {
-    // TODO: implement endRefresh
     return _offsetController.animateTo(1.0).whenComplete(() {});
   }
 
   @override
   Widget buildContent(BuildContext context, RefreshStatus mode) {
-    // TODO: implement buildContent
     return SlideTransition(
       child: ScaleTransition(
         child: (mode != RefreshStatus.idle || mode != RefreshStatus.canRefresh)

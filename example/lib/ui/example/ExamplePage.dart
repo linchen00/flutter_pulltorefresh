@@ -28,7 +28,6 @@ import 'useStage/tapbutton_refresh.dart';
 class ExamplePage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _ExamplePageState();
   }
 }
@@ -36,13 +35,12 @@ class ExamplePage extends StatefulWidget {
 class ExampleItem extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _ExampleItemState();
   }
 
-  final Function onClick;
+  final VoidCallback? onClick;
 
-  final String title;
+  final String? title;
 
   ExampleItem({this.title, this.onClick});
 }
@@ -50,14 +48,13 @@ class ExampleItem extends StatefulWidget {
 class _ExampleItemState extends State<ExampleItem> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return InkWell(
       onTap: widget.onClick,
       child: Container(
         height: 100.0,
         child: Card(
           child: Center(
-            child: Text(widget.title),
+            child: Text(widget.title!),
           ),
         ),
       ),
@@ -67,19 +64,16 @@ class _ExampleItemState extends State<ExampleItem> {
 
 class _ExamplePageState extends State<ExamplePage>
     with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
-    // TODO: implement initState
     _tabController = TabController(initialIndex: 0, length: 3, vsync: this);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-
     final List<ExampleItem> items1 = [
       ExampleItem(
           title: "基础用法",

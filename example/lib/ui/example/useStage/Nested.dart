@@ -11,7 +11,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart' hide RefreshIndicator;
    this bug I have no idea how to fix this,only waiting for flutter fix this bug.
  */
 class NestedRefresh extends StatefulWidget {
-  NestedRefresh({Key key}) : super(key: key);
+  NestedRefresh({Key? key}) : super(key: key);
 
   @override
   NestedRefreshState createState() => NestedRefreshState();
@@ -21,7 +21,7 @@ class NestedRefreshState extends State<NestedRefresh>
     with SingleTickerProviderStateMixin {
 //  RefreshMode  refreshing = RefreshMode.idle;
 //  LoadMode loading = LoadMode.idle;
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
   List<Widget> data = [];
 
   void _getDatas() {
@@ -42,7 +42,6 @@ class NestedRefreshState extends State<NestedRefresh>
 
   @override
   void initState() {
-    // TODO: implement initState
     _getDatas();
     _refreshController = RefreshController(initialRefresh: true);
     super.initState();
@@ -99,7 +98,6 @@ class NestedRefreshState extends State<NestedRefresh>
 class RefreshListView extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _RefreshListViewState();
   }
 }
@@ -132,7 +130,7 @@ class _RefreshListViewState extends State<RefreshListView> {
       enablePullUp: true,
       header: WaterDropHeader(),
       footer: CustomFooter(
-        builder: (BuildContext context, LoadStatus mode) {
+        builder: (BuildContext context, LoadStatus? mode) {
           Widget body;
           if (mode == LoadStatus.idle) {
             body = Text("pull up load");
@@ -166,7 +164,6 @@ class _RefreshListViewState extends State<RefreshListView> {
   // don't forget to dispose refreshController
   @override
   void dispose() {
-    // TODO: implement dispose
     _refreshController.dispose();
     super.dispose();
   }

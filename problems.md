@@ -14,7 +14,7 @@
 在RefreshConfiguration有提供一个属性hideFooterWhenNotFull,绝大多数的情况,它可以帮你计算并判断是否隐藏。
 
 5. <h3>指示器支持自定义帧动画吗?比如,我想随着下拉拖动改变gif进度,到达某个状态开始循环播放</h3>
-这个问题我内部已经有完美的解决方法,需要依赖到我的三方插件来解决控制gif进度的问题,用法详见[这里](https://github.com/peng8350/flutter_gifimage),[例子](example/lib/ui/example/customindicator/gif_indicator_example1.dart)
+支持。可使用 [gif_view](https://pub.dev/packages/gif_view) 跳转到指定 GIF 帧并控制播放。[示例](example/lib/ui/example/customindicator/gif_indicator_example1.dart)展示了在刷新或加载开始、结束时播放不同帧段。如果要让 GIF 帧随下拉距离变化，可在 `onOffsetChange` 中调用 `GifController.seek`。
 
 
 6. <h3>关于改变回弹动画的问题,SpringDecription里三个变量值是什么关系?怎么利用这三个值达到我要的回弹效果?</h3>

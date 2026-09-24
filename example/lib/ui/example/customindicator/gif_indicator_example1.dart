@@ -4,71 +4,70 @@
  * Time:  2019-07-26 18:22
  */
 
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:flutter_gifimage/flutter_gifimage.dart';
+import 'package:gif_view/gif_view.dart';
 import 'package:flutter/material.dart'
     hide RefreshIndicator, RefreshIndicatorState;
 
-/*
-  I use my plugin to implements gif effect,this plugin can help you to controll gif easily,
-  see page to find about usage: (https://github.com/peng8350/flutter_gifimage)
-*/
 class GifHeader1 extends RefreshIndicator {
   GifHeader1() : super(height: 80.0, refreshStyle: RefreshStyle.Follow);
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return GifHeader1State();
   }
 }
 
-class GifHeader1State extends RefreshIndicatorState<GifHeader1>
-    with SingleTickerProviderStateMixin {
-  GifController _gifController;
+class GifHeader1State extends RefreshIndicatorState<GifHeader1> {
+  final GifController _gifController = GifController();
+  bool _loopRefreshFrames = false;
+  Completer<void>? _endRefreshCompleter;
 
   @override
-  void initState() {
-    // TODO: implement initState
-    // init frame is 2
-    _gifController = GifController(
-      vsync: this,
-      value: 1,
-    );
-    super.initState();
-  }
-
-  @override
-  void onModeChange(RefreshStatus mode) {
-    // TODO: implement onModeChange
+  void onModeChange(RefreshStatus? mode) {
     if (mode == RefreshStatus.refreshing) {
-      _gifController.repeat(
-          min: 0, max: 29, period: Duration(milliseconds: 500));
+      _loopRefreshFrames = true;
+      _gifController.seek(0);
+      _gifController.play(initialFrame: 0);
     }
     super.onModeChange(mode);
   }
 
   @override
   Future<void> endRefresh() {
-    // TODO: implement endRefresh
-    _gifController.value = 30;
-    return _gifController.animateTo(59, duration: Duration(milliseconds: 500));
+    _loopRefreshFrames = false;
+    _endRefreshCompleter = Completer<void>();
+    _gifController.seek(30);
+    _gifController.play(initialFrame: 30);
+    return _endRefreshCompleter!.future;
   }
 
   @override
   void resetValue() {
-    // TODO: implement resetValue
-    // reset not ok , the plugin need to update lowwer
-    _gifController.value = 0;
+    _loopRefreshFrames = false;
+    _gifController.pause();
+    _gifController.seek(0);
     super.resetValue();
   }
 
   @override
   Widget buildContent(BuildContext context, RefreshStatus mode) {
-    // TODO: implement buildContent
-    return GifImage(
+    return GifView(
       image: AssetImage("images/gifindicator1.gif"),
       controller: _gifController,
+      autoPlay: false,
+      loop: false,
+      frameRate: 60,
+      onFrame: (frame) {
+        if (_loopRefreshFrames && frame >= 29) {
+          _gifController.seek(0);
+        } else if (_endRefreshCompleter != null && frame >= 59) {
+          _gifController.pause();
+          _endRefreshCompleter!.complete();
+          _endRefreshCompleter = null;
+        }
+      },
       height: 80.0,
       width: 537.0,
     );
@@ -76,7 +75,9 @@ class GifHeader1State extends RefreshIndicatorState<GifHeader1>
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    _loopRefreshFrames = false;
+    _endRefreshCompleter?.complete();
+    _endRefreshCompleter = null;
     _gifController.dispose();
     super.dispose();
   }
@@ -87,35 +88,35 @@ class GifFooter1 extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _GifFooter1State();
   }
 }
 
-class _GifFooter1State extends State<GifFooter1>
-    with SingleTickerProviderStateMixin {
-  GifController _gifController;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    // init frame is 2
-    _gifController = GifController(
-      vsync: this,
-      value: 1,
-    );
-    super.initState();
-  }
+class _GifFooter1State extends State<GifFooter1> {
+  final GifController _gifController = GifController();
+  bool _loopLoadingFrames = false;
+  Completer<void>? _endLoadingCompleter;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return CustomFooter(
       height: 80,
       builder: (context, mode) {
-        return GifImage(
+        return GifView(
           image: AssetImage("images/gifindicator1.gif"),
           controller: _gifController,
+          autoPlay: false,
+          loop: false,
+          frameRate: 60,
+          onFrame: (frame) {
+            if (_loopLoadingFrames && frame >= 29) {
+              _gifController.seek(0);
+            } else if (_endLoadingCompleter != null && frame >= 59) {
+              _gifController.pause();
+              _endLoadingCompleter!.complete();
+              _endLoadingCompleter = null;
+            }
+          },
           height: 80.0,
           width: 537.0,
         );
@@ -123,21 +124,26 @@ class _GifFooter1State extends State<GifFooter1>
       loadStyle: LoadStyle.ShowWhenLoading,
       onModeChange: (mode) {
         if (mode == LoadStatus.loading) {
-          _gifController.repeat(
-              min: 0, max: 29, period: Duration(milliseconds: 500));
+          _loopLoadingFrames = true;
+          _gifController.seek(0);
+          _gifController.play(initialFrame: 0);
         }
       },
       endLoading: () async {
-        _gifController.value = 30;
-        return _gifController.animateTo(59,
-            duration: Duration(milliseconds: 500));
+        _loopLoadingFrames = false;
+        _endLoadingCompleter = Completer<void>();
+        _gifController.seek(30);
+        _gifController.play(initialFrame: 30);
+        return _endLoadingCompleter!.future;
       },
     );
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    _loopLoadingFrames = false;
+    _endLoadingCompleter?.complete();
+    _endLoadingCompleter = null;
     _gifController.dispose();
     super.dispose();
   }
@@ -146,7 +152,6 @@ class _GifFooter1State extends State<GifFooter1>
 class GifIndicatorExample1 extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return GifIndicatorExample1State();
   }
 }
@@ -155,10 +160,8 @@ class GifIndicatorExample1State extends State<GifIndicatorExample1> {
   RefreshController _controller = RefreshController();
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return RefreshConfiguration.copyAncestor(
       context: context,
-      // two attrs enable footer implements the effect in header default
       enableBallisticLoad: false,
       footerTriggerDistance: -80,
       child: SmartRefresher(

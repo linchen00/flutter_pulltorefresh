@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -14,14 +13,14 @@ class AnimatedListExample extends StatefulWidget {
 class _AnimatedListExampleState extends State<AnimatedListExample> {
   final GlobalKey<SliverAnimatedListState> _listKey =
       new GlobalKey<SliverAnimatedListState>();
-  ListModel<int> _list;
-  int _selectedItem;
-  int _nextItem; // The next item inserted when the user presses the '+' button.
+  late ListModel<int?> _list;
+  int? _selectedItem;
+  int? _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
     super.initState();
-    _list = new ListModel<int>(
+    _list = new ListModel<int?>(
       listKey: _listKey,
       initialItems: <int>[0, 1, 2],
       removedItemBuilder: _buildRemovedItem,
@@ -34,7 +33,7 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
       BuildContext context, int index, Animation<double> animation) {
     return new CardItem(
       animation: animation,
-      item: _list[index],
+      item: _list[index]!,
       selected: _selectedItem == _list[index],
       onTap: () {
         if (mounted)
@@ -64,20 +63,20 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
   void _insert() {
     for (int i = 0; i < 5; i++) {
       final int index =
-          _selectedItem == null ? _list.length : _list.indexOf(_selectedItem);
-      _list.insert(index, _nextItem++);
+          _list.indexOf(_selectedItem);
+      final int item = _nextItem!;
+      _nextItem = item + 1;
+      _list.insert(index, item);
     }
   }
 
   // Remove the selected item from the list model.
   void _remove() {
-    if (_selectedItem != null) {
-      _list.removeAt(_list.indexOf(_selectedItem));
-      if (mounted)
-        setState(() {
-          _selectedItem = null;
-        });
-    }
+    _list.removeAt(_list.indexOf(_selectedItem));
+    if (mounted)
+      setState(() {
+        _selectedItem = null;
+      });
   }
 
   RefreshController _refreshController = RefreshController();
@@ -138,28 +137,27 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
 /// [SliverAnimatedListState.insertItem] and [SliverAnimatedList.removeItem].
 class ListModel<E> {
   ListModel({
-    @required this.listKey,
-    @required this.removedItemBuilder,
-    Iterable<E> initialItems,
-  })  : assert(listKey != null),
-        assert(removedItemBuilder != null),
+    required this.listKey,
+    required this.removedItemBuilder,
+    Iterable<E>? initialItems,
+  })  : assert(removedItemBuilder != null),
         _items = new List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<SliverAnimatedListState> listKey;
   final dynamic removedItemBuilder;
   final List<E> _items;
 
-  SliverAnimatedListState get _sliverAnimatedList => listKey.currentState;
+  SliverAnimatedListState? get _sliverAnimatedList => listKey.currentState;
 
   void insert(int index, E item) {
     _items.insert(index, item);
-    _sliverAnimatedList.insertItem(index);
+    _sliverAnimatedList!.insertItem(index);
   }
 
   E removeAt(int index) {
     final E removedItem = _items.removeAt(index);
     if (removedItem != null) {
-      _sliverAnimatedList.removeItem(index,
+      _sliverAnimatedList!.removeItem(index,
           (BuildContext context, Animation<double> animation) {
         return removedItemBuilder(removedItem, context, animation);
       });
@@ -180,26 +178,24 @@ class ListModel<E> {
 /// from 0 to 128 as the animation varies from 0.0 to 1.0.
 class CardItem extends StatelessWidget {
   const CardItem(
-      {Key key,
-      @required this.animation,
+      {Key? key,
+      required this.animation,
       this.onTap,
-      @required this.item,
-      this.selected: false})
-      : assert(animation != null),
-        assert(item != null && item >= 0),
-        assert(selected != null),
+      required this.item,
+      this.selected = false})
+      : assert(item >= 0),
         super(key: key);
 
   final Animation<double> animation;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final int item;
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    TextStyle textStyle = Theme.of(context).textTheme.bodyText1;
+    TextStyle? textStyle = Theme.of(context).textTheme.bodyLarge;
     if (selected)
-      textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);
+      textStyle = textStyle!.copyWith(color: Colors.lightGreenAccent[400]);
     return new Padding(
       padding: const EdgeInsets.all(2.0),
       child: new SizeTransition(

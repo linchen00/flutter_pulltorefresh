@@ -3,10 +3,11 @@
  * Email: peng8350@gmail.com
  * Time:  2019-07-11 12:23
  */
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'dart:math' as math;
 
 /*
    aim to implements expand all the free empty place when viewport is not full
@@ -18,13 +19,13 @@ import 'dart:math' as math;
 
 class ExpandedViewport extends Viewport {
   ExpandedViewport({
-    Key key,
+    Key? key,
     AxisDirection axisDirection = AxisDirection.down,
-    AxisDirection crossAxisDirection,
+    AxisDirection? crossAxisDirection,
     double anchor = 0.0,
-    ScrollPosition offset,
-    Key center,
-    double cacheExtent,
+    required ViewportOffset offset,
+    Key? center,
+    double? cacheExtent,
     List<Widget> slivers = const <Widget>[],
   }) : super(
             key: key,
@@ -34,18 +35,19 @@ class ExpandedViewport extends Viewport {
             anchor: anchor,
             offset: offset,
             center: center,
-            cacheExtent: cacheExtent);
+            scrollCacheExtent: cacheExtent == null
+                ? null
+                : ScrollCacheExtent.pixels(cacheExtent));
 
   @override
   RenderViewport createRenderObject(BuildContext context) {
-    // TODO: implement createRenderObject
     return _RenderExpandedViewport(
       axisDirection: axisDirection,
       crossAxisDirection: crossAxisDirection ??
           Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       anchor: anchor,
       offset: offset,
-      cacheExtent: cacheExtent,
+      scrollCacheExtent: scrollCacheExtent,
     );
   }
 }
@@ -53,12 +55,12 @@ class ExpandedViewport extends Viewport {
 class _RenderExpandedViewport extends RenderViewport {
   _RenderExpandedViewport({
     AxisDirection axisDirection = AxisDirection.down,
-    @required AxisDirection crossAxisDirection,
-    @required ViewportOffset offset,
+    required AxisDirection crossAxisDirection,
+    required ViewportOffset offset,
     double anchor = 0.0,
-    List<RenderSliver> children,
-    RenderSliver center,
-    double cacheExtent,
+    List<RenderSliver>? children,
+    RenderSliver? center,
+    ScrollCacheExtent? scrollCacheExtent,
   }) : super(
             axisDirection: axisDirection,
             crossAxisDirection: crossAxisDirection,
@@ -66,18 +68,17 @@ class _RenderExpandedViewport extends RenderViewport {
             anchor: anchor,
             children: children,
             center: center,
-            cacheExtent: cacheExtent);
+            scrollCacheExtent: scrollCacheExtent);
 
   @override
   void performLayout() {
-    // TODO: implement performLayout
     super.performLayout();
-    RenderSliver expand;
-    RenderSliver p = firstChild;
+    RenderSliver? expand;
+    RenderSliver? p = firstChild;
     double totalLayoutExtent = 0;
     double frontExtent = 0.0;
     while (p != null) {
-      totalLayoutExtent += p.geometry.scrollExtent;
+      totalLayoutExtent += p.geometry!.scrollExtent;
       if (p is _RenderExpanded) {
         expand = p;
         frontExtent = totalLayoutExtent;
@@ -86,14 +87,14 @@ class _RenderExpandedViewport extends RenderViewport {
       p = childAfter(p);
     }
 
-    if (expand != null && size.height > totalLayoutExtent) {
+    if (size.height > totalLayoutExtent) {
       _attemptLayout(expand, size.height, size.width,
           offset.pixels - frontExtent - (size.height - totalLayoutExtent));
     }
   }
 
   // _minScrollExtent private in super,no setter method
-  double _attemptLayout(RenderSliver expandPosition, double mainAxisExtent,
+  double _attemptLayout(RenderSliver? expandPosition, double mainAxisExtent,
       double crossAxisExtent, double correctedOffset) {
     assert(!mainAxisExtent.isNaN);
     assert(mainAxisExtent >= 0.0);
@@ -110,18 +111,17 @@ class _RenderExpandedViewport extends RenderViewport {
 
     final double forwardDirectionRemainingPaintExtent =
         (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
+    final double cacheExtent = scrollCacheExtent.value;
     final double fullCacheExtent = mainAxisExtent + 2 * cacheExtent;
     final double centerCacheOffset = centerOffset + cacheExtent;
     final double forwardDirectionRemainingCacheExtent =
         (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
 
-    final RenderSliver leadingNegativeChild = childBefore(center);
     // positive scroll offsets
     return layoutChildSequence(
       child: expandPosition,
       scrollOffset: math.max(0.0, -centerOffset),
-      overlap:
-          leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
+      overlap: 0.0,
       layoutOffset: centerOffset >= mainAxisExtent
           ? centerOffset
           : reverseDirectionRemainingPaintExtent,
@@ -142,7 +142,6 @@ class SliverExpanded extends SingleChildRenderObjectWidget {
 
   @override
   RenderSliver createRenderObject(BuildContext context) {
-    // TODO: implement createRenderObject
     return _RenderExpanded();
   }
 }
@@ -151,7 +150,6 @@ class _RenderExpanded extends RenderSliver
     with RenderObjectWithChildMixin<RenderBox> {
   @override
   void performLayout() {
-    // TODO: implement performLayout
     geometry = SliverGeometry.zero;
   }
 }

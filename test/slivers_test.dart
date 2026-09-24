@@ -4,7 +4,6 @@
     createTime: 2019-07-21 16:59
  */
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -16,7 +15,7 @@ import 'test_indicator.dart';
 Future<void>? buildNotFullList(tester, bool reverse, Axis direction,
     {dynamic footer = const TestFooter(),
     dynamic header = const TestHeader(),
-    bool initload: false}) {
+    bool initload = false}) {
   final RefreshController _refreshController = RefreshController(
       initialLoadStatus: initload ? LoadStatus.loading : LoadStatus.idle);
   return tester.pumpWidget(MaterialApp(
@@ -143,25 +142,6 @@ void main() {
       // behind the bottom ,if else ,it is render error
       expect(
           sliver.child!.localToGlobal(Offset(0.0, 0.0)), const Offset(0, 600));
-
-//      // up
-//      await buildNotFullList(tester, true, Axis.vertical,
-//          footer: footer, initload: true);
-//
-//      sliver = tester.renderObject(find.byType(SliverLoading));
-//
-//      /// build failed in this ,may be I do some errors in this direction ,why -48.0?
-//      expect(
-//          sliver.child.localToGlobal(Offset(0.0, 0.0)), const Offset(0, -60.0));
-
-      // left
-//      await buildNotFullList(tester, true, Axis.horizontal,
-//          footer: footer, initload: true);
-//
-//      sliver = tester.renderObject(find.byType(SliverLoading));
-//      // behind the bottom ,if else ,it is render error
-//      expect(
-//          sliver.child.localToGlobal(Offset(0.0, 0.0)), const Offset(-60.0, 0));
 
       // right
       await buildNotFullList(tester, false, Axis.horizontal,

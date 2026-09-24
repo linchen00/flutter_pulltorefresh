@@ -9,25 +9,16 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'base/IndicatorActivity.dart';
 
 class IndicatorPage extends StatefulWidget {
-  IndicatorPage({Key key, this.title}) : super(key: key);
+  IndicatorPage({Key? key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  final String? title;
 
   @override
   _IndicatorPageState createState() => new _IndicatorPageState();
 }
 
 class _IndicatorPageState extends State<IndicatorPage> {
-  List<Widget> items;
+  late List<Widget> items;
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +32,11 @@ class _IndicatorPageState extends State<IndicatorPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     items = [
       IndicatorItem(
           title: "经典指示器(跟随)",
@@ -177,15 +166,14 @@ class _IndicatorPageState extends State<IndicatorPage> {
 class IndicatorItem extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _IndicatorItemState();
   }
 
-  final Function onClick;
+  final VoidCallback? onClick;
 
-  final String imgRes;
+  final String? imgRes;
 
-  final String title;
+  final String? title;
 
   IndicatorItem({this.title, this.imgRes, this.onClick});
 }
@@ -193,7 +181,6 @@ class IndicatorItem extends StatefulWidget {
 class _IndicatorItemState extends State<IndicatorItem> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return InkWell(
       onTap: widget.onClick,
       child: Card(
@@ -201,13 +188,13 @@ class _IndicatorItemState extends State<IndicatorItem> {
           children: <Widget>[
             Center(
               child: Image.asset(
-                widget.imgRes,
+                widget.imgRes!,
                 fit: BoxFit.cover,
                 width: 180.0,
               ),
             ),
             Center(
-              child: Text(widget.title),
+              child: Text(widget.title!),
             )
           ],
         ),

@@ -45,7 +45,7 @@ Now, suppose we want to implement an indicator like this, as follows:
 ![](arts/custom_header.gif)
 
 When dragging, change the size of the picture as offset changes, and then after refreshing, call a moving picture to form the effect of running past.
-So, the question arises, how should we achieve such a function?
+So, the question arises, how should we achieve such a VoidCallback?
 First of all, I prepared a JPG and a gif. JPG represents the first frame of gif. Of course, if you want to control gif, there is a way. A GIF is enough.
 Define a class to inherit RefreshIndicator (note the material package rename)
 

@@ -1,33 +1,32 @@
 import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Test4 extends StatefulWidget {
-  Test4({Key key}) : super(key: key);
+  Test4({Key? key}) : super(key: key);
 
   @override
   Test4State createState() => Test4State();
 }
 
 class Test4State extends State<Test4> with TickerProviderStateMixin {
-//  RefreshMode  refreshing = RefreshMode.idle;
-//  LoadMode loading = LoadMode.idle;
   ValueNotifier<double> topOffsetLis = ValueNotifier(0.0);
   ValueNotifier<double> bottomOffsetLis = ValueNotifier(0.0);
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
 
   List<Widget> data = [];
 
   void _getDatas() {
     data.add(Row(
       children: <Widget>[
-        FlatButton(
+        TextButton(
             onPressed: () {
               _refreshController.requestRefresh();
             },
             child: Text("请求刷新")),
-        FlatButton(
+        TextButton(
             onPressed: () {
               _refreshController.requestLoading();
             },
@@ -59,64 +58,6 @@ class Test4State extends State<Test4> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    // TODO: implement initState
-    // for test #68 true-> false ->true
-//    Future.delayed(Duration(milliseconds: 3000), () {
-//      _enablePullDown = false;
-//      _enablePullUp = false;
-//      if (mounted) setState(() {});
-//    });
-//    Future.delayed(Duration(milliseconds: 6000), () {
-//      _enablePullDown = true;
-//      _enablePullUp = true;
-//      if (mounted) setState(() {});
-//    });
-
-//    // for test #68 false-> true ->false
-//    Future.delayed(Duration(milliseconds: 3000),(){
-//      _enablePullDown = false;
-//      _enablePullUp = true;
-//    if(mounted)
-//      setState(() {
-//
-//      });
-//    });
-//    Future.delayed(Duration(milliseconds: 6000),(){
-//      _enablePullDown = true;
-//      _enablePullUp = false;
-//    if(mounted)
-//      setState(() {
-//
-//      });
-//    });
-//    Future.delayed(Duration(milliseconds: 3000),(){
-//      _enablePullDown = true;
-//      _enablePullUp = false;
-//    if(mounted)
-//      setState(() {
-//
-//      });
-//    });
-//    Future.delayed(Duration(milliseconds: 6000),(){
-//      _enablePullDown = false;
-//      _enablePullUp = true;
-//    if(mounted)
-//      setState(() {
-//
-//      });
-//    });
-//    final NetworkImage provider = AssetImage("images/animate.gif");
-//    provider.obtainKey(ImageConfiguration()).then((k) async{
-//        final ByteData data = await k.bundle.load(k.name);
-//         ui.Codec codec= await PaintingBinding.instance.instantiateImageCodec(data.buffer.asUint8List());
-//         ui.FrameInfo info;
-//         for(int i = 0 ;i<54;i++){
-//           info = await codec.getNextFrame();
-//         }
-//         print(codec.frameCount);
-//        return ;
-//    });
-
     _getDatas();
     _refreshController = RefreshController(initialRefresh: false);
     super.initState();
@@ -124,16 +65,11 @@ class Test4State extends State<Test4> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-//    // Check that a second resolve of the same image is synchronous.
-//    final ImageStream stream = provider.resolve(provider.);
-//    bool isSync;
-//    stream.addListener(ImageStreamListener((ImageInfo image, bool sync) { isSync = sync; }));
     return RefreshConfiguration.copyAncestor(
       context: context,
       child: SmartRefresher.builder(
@@ -153,13 +89,13 @@ class Test4State extends State<Test4> with TickerProviderStateMixin {
                   Center(
                     child: Row(
                       children: <Widget>[
-                        RaisedButton(
+                        ElevatedButton(
                           child: Text("主动刷新(移动)"),
                           onPressed: () {
                             _refreshController.requestRefresh();
                           },
                         ),
-                        RaisedButton(
+                        ElevatedButton(
                           child: Text("主动加载"),
                           onPressed: () {
                             _refreshController.requestLoading();
@@ -192,37 +128,31 @@ class Test4State extends State<Test4> with TickerProviderStateMixin {
       hideFooterWhenNotFull: false,
     );
   }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => false;
 }
 
 class CirclePainter extends CustomClipper<Path> {
-  final double offset;
-  final bool up;
+  final double? offset;
+  final bool? up;
 
   CirclePainter({this.offset, this.up});
 
   @override
   Path getClip(Size size) {
-    // TODO: implement getClip
     final path = Path();
-    if (!up) path.moveTo(0.0, size.height);
+    if (!up!) path.moveTo(0.0, size.height);
     path.cubicTo(
         0.0,
-        up ? 0.0 : size.height,
+        up! ? 0.0 : size.height,
         size.width / 2,
-        up ? offset * 2.3 : size.height - offset * 2.3,
+        up! ? offset! * 2.3 : size.height - offset! * 2.3,
         size.width,
-        up ? 0.0 : size.height);
+        up! ? 0.0 : size.height);
     path.close();
     return path;
   }
 
   @override
   bool shouldReclip(CustomClipper oldClipper) {
-    // TODO: implement shouldReclip
     return oldClipper != this;
   }
 }
@@ -230,12 +160,11 @@ class CirclePainter extends CustomClipper<Path> {
 class RefreshListView extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _RefreshListViewState();
   }
 
-  final ScrollPhysics physics;
-  final List<Widget> slivers;
+  final ScrollPhysics? physics;
+  final List<Widget>? slivers;
 
   RefreshListView({this.slivers, this.physics});
 }
@@ -245,10 +174,9 @@ class _RefreshListViewState extends State<RefreshListView> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return show
         ? CustomScrollView(
-            slivers: widget.slivers,
+            slivers: widget.slivers!,
             physics: AlwaysScrollableScrollPhysics(),
           )
         : CupertinoActivityIndicator();

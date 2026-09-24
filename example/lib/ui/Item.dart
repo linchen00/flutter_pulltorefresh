@@ -6,7 +6,7 @@
 import 'package:flutter/material.dart';
 
 class Item extends StatefulWidget {
-  final String title;
+  final String? title;
 
   Item({this.title});
 
@@ -21,7 +21,7 @@ class _ItemState extends State<Item> {
       child: Card(
         margin: EdgeInsets.only(left: 10.0, right: 10.0, top: 5.0, bottom: 5.0),
         child: Center(
-          child: Text(widget.title),
+          child: Text(widget.title!),
         ),
       ),
       height: 100.0,
@@ -30,7 +30,6 @@ class _ItemState extends State<Item> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 }

@@ -22,32 +22,30 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 class CustomHeaderExample extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _CustomHeaderExampleState();
   }
 }
 
 class _CustomHeaderExampleState extends State<CustomHeaderExample>
     with TickerProviderStateMixin {
-  AnimationController _anicontroller, _scaleController;
-  AnimationController _footerController;
+  AnimationController? _anicontroller, _scaleController;
+  AnimationController? _footerController;
   RefreshController _refreshController = RefreshController();
   int count = 20;
   @override
   void initState() {
-    // TODO: implement initState
     _anicontroller = AnimationController(
         vsync: this, duration: Duration(milliseconds: 2000));
     _scaleController =
         AnimationController(value: 0.0, vsync: this, upperBound: 1.0);
     _footerController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 2000));
-    _refreshController.headerMode.addListener(() {
+    _refreshController.headerMode!.addListener(() {
       if (_refreshController.headerStatus == RefreshStatus.idle) {
-        _scaleController.value = 0.0;
-        _anicontroller.reset();
+        _scaleController!.value = 0.0;
+        _anicontroller!.reset();
       } else if (_refreshController.headerStatus == RefreshStatus.refreshing) {
-        _anicontroller.repeat();
+        _anicontroller!.repeat();
       }
     });
     super.initState();
@@ -55,17 +53,15 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _refreshController.dispose();
-    _scaleController.dispose();
-    _footerController.dispose();
-    _anicontroller.dispose();
+    _scaleController!.dispose();
+    _footerController!.dispose();
+    _anicontroller!.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Container(
       child: SmartRefresher(
         enablePullUp: true,
@@ -88,10 +84,10 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
         footer: CustomFooter(
           onModeChange: (mode) {
             if (mode == LoadStatus.loading) {
-              _scaleController.value = 0.0;
-              _footerController.repeat();
+              _scaleController!.value = 0.0;
+              _footerController!.repeat();
             } else {
-              _footerController.reset();
+              _footerController!.reset();
             }
           },
           builder: (context, mode) {
@@ -128,13 +124,13 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
         header: CustomHeader(
           refreshStyle: RefreshStyle.Behind,
           onOffsetChange: (offset) {
-            if (_refreshController.headerMode.value != RefreshStatus.refreshing)
-              _scaleController.value = offset / 80.0;
+            if (_refreshController.headerMode!.value != RefreshStatus.refreshing)
+              _scaleController!.value = offset / 80.0;
           },
           builder: (c, m) {
             return Container(
               child: FadeTransition(
-                opacity: _scaleController,
+                opacity: _scaleController!,
                 child: ScaleTransition(
                   child: SpinKitFadingCircle(
                     size: 30.0,
@@ -147,7 +143,7 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
                       );
                     },
                   ),
-                  scale: _scaleController,
+                  scale: _scaleController!,
                 ),
               ),
               alignment: Alignment.center,

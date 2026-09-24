@@ -13,7 +13,7 @@ If you have this error message, it's usually because there's no limit on the hei
 In RefreshConfiguration, there is an attribute hideFooterWhenNotFull, which in most cases can help you calculate and determine whether or not to hide.
 
 5.  <h3>Does the indicator support custom frame animation? For example, I want to change the GIF schedule with drag-and-drop, reach a certain state and start cycling.</h3>
-Now this question has been solved ,check out this [plugin](https://github.com/peng8350/flutter_gifimage),can help you controll gif progress,and [example](example/lib/ui/example/customindicator/gif_indicator_example1.dart) is here
+Yes. Use [gif_view](https://pub.dev/packages/gif_view) to seek to a GIF frame and control playback. The [example](example/lib/ui/example/customindicator/gif_indicator_example1.dart) plays different frame ranges when refresh or loading starts and ends. To tie the frame to the drag distance, call `GifController.seek` from `onOffsetChange`.
 
 6.  <h3>What is the relationship between the values of three variables in Spring Decription and how to use these values to achieve the rebound effect I want?</h3>
 This question suggests that you look up the API in flutter, and you need to understand a certain amount of physics and mathematics. Actually, I don't know how to calculate it.

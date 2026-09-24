@@ -6,7 +6,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 /// Implementation of localized strings for the [ClassicHeader],[ClassicFooter],[TwoLevelHeader]
 ///
@@ -50,7 +49,6 @@ import 'package:flutter/widgets.dart';
 /// ```dart
 ///   @override
 //  bool isSupported(Locale locale) {
-//    return ['en', 'zh', 'fr', 'ru', 'uk','xx'].contains(locale.languageCode);
 //  }
 /// ```
 ///

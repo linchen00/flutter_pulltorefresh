@@ -7,8 +7,6 @@
 // convert footer to header to use ,behaviour almost same with header
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_gifimage/flutter_gifimage.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../../Item.dart';
@@ -16,7 +14,6 @@ import '../../Item.dart';
 class ConvertFooter extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _ConvertFooterState();
   }
 }
@@ -45,7 +42,6 @@ class _ConvertFooterState extends State<ConvertFooter> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       body: RefreshConfiguration.copyAncestor(
         enableBallisticLoad: false,

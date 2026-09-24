@@ -6,6 +6,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import '../../../other/expanded_viewport.dart';
 
 /*
@@ -18,7 +19,6 @@ import '../../../other/expanded_viewport.dart';
 class QQChatList extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _QQChatListState();
   }
 }
@@ -56,13 +56,11 @@ class _QQChatListState extends State<QQChatList> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return CupertinoApp(
       home: RefreshConfiguration.copyAncestor(
         context: context,
@@ -183,9 +181,11 @@ class _QQChatListState extends State<QQChatList> {
                           margin: EdgeInsets.all(10.0),
                         ),
                       ),
-                      RaisedButton(
+                      ElevatedButton(
                         child: Text("发送"),
-                        color: Colors.blueAccent,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                        ),
                         onPressed: () {
                           _scrollController.jumpTo(0.0);
                           data.insert(
@@ -213,23 +213,22 @@ class _QQChatListState extends State<QQChatList> {
 }
 
 class _MessageItem extends StatelessWidget {
-  final String content;
-  final String author;
-  final bool isMe;
-  final String url;
+  final String? content;
+  final String? author;
+  final bool? isMe;
+  final String? url;
 
   _MessageItem({this.content, this.author, this.isMe, this.url});
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Container(
       margin: EdgeInsets.only(top: 10.0),
       child: Wrap(
-        textDirection: isMe ? TextDirection.rtl : TextDirection.ltr,
+        textDirection: isMe! ? TextDirection.rtl : TextDirection.ltr,
         children: <Widget>[
           CircleAvatar(
-            backgroundImage: NetworkImage(url),
+            backgroundImage: NetworkImage(url!),
             radius: 20.0,
           ),
           Container(width: 15.0),
@@ -239,9 +238,9 @@ class _MessageItem extends StatelessWidget {
               Container(
                 height: 25.0,
                 width: 222.0,
-                alignment: isMe ? Alignment.topRight : Alignment.topLeft,
+                alignment: isMe! ? Alignment.topRight : Alignment.topLeft,
                 child: Text(
-                  author,
+                  author!,
                   style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),
               ),
@@ -251,13 +250,13 @@ class _MessageItem extends StatelessWidget {
                   minHeight: 100.0,
                   maxWidth: 222.0,
                 ),
-                alignment: isMe ? Alignment.topRight : Alignment.topLeft,
+                alignment: isMe! ? Alignment.topRight : Alignment.topLeft,
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  content,
+                  content!,
                   style: TextStyle(color: Colors.black),
                 ),
                 padding: EdgeInsets.all(10.0),

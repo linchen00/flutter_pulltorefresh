@@ -1,21 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart' hide RefreshIndicator;
 
 class Test1 extends StatefulWidget {
-  Test1({Key key}) : super(key: key);
+  Test1({Key? key}) : super(key: key);
 
   @override
   Test1State createState() => Test1State();
 }
 
 class Test1State extends State<Test1> {
-//  RefreshMode  refreshing = RefreshMode.idle;
-//  LoadMode loading = LoadMode.idle;
-  RefreshController _refreshController;
-  ScrollController _scrollController;
+  late RefreshController _refreshController;
+  ScrollController? _scrollController;
   List<Widget> data = [];
 
   void _getDatas() {
@@ -31,7 +28,7 @@ class Test1State extends State<Test1> {
   }
 
   void scrollTop() {
-    _scrollController.animateTo(0.0,
+    _scrollController!.animateTo(0.0,
         duration: const Duration(milliseconds: 200), curve: Curves.linear);
   }
 
@@ -39,23 +36,13 @@ class Test1State extends State<Test1> {
     _refreshController.requestRefresh();
   }
 
-  void _onOffsetCallback(bool isUp, double offset) {}
-
   @override
   void initState() {
-    // TODO: implement initState
     _getDatas();
     _scrollController = ScrollController(keepScrollOffset: true);
     _refreshController = RefreshController();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-//      _refreshController.requestRefresh(true);
-    });
     super.initState();
   }
-
-//  Widget _footerCreate(BuildContext context,int mode){
-//    return new ClassicIndicator(mode: mode);
-//  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +126,6 @@ class _ItemState extends State<Item> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 }

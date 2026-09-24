@@ -6,11 +6,13 @@
 
 import 'dart:async';
 import 'dart:convert' show json;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../Item.dart';
 import 'package:http/http.dart' as HTTP;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import '../../Item.dart';
 
 /*
    this example will show you how to implements horizontal refresh or reverse,
@@ -26,12 +28,12 @@ class _HorizontalRefreshState extends State<HorizontalRefresh>
   RefreshController _controller1 = RefreshController();
   RefreshController _controller2 = RefreshController();
   int indexPage = 0;
-  List<String> data = [];
+  List<String?> data = [];
 
   void _fetch() {
     HTTP
-        .get(
-            'https://gank.io/api/v2/data/category/Girl/type/Girl/page/$indexPage/count/10')
+        .get(Uri.parse(
+            'https://gank.io/api/v2/data/category/Girl/type/Girl/page/$indexPage/count/10'))
         .then((HTTP.Response response) {
       Map map = json.decode(response.body);
       return map["data"];
@@ -51,7 +53,6 @@ class _HorizontalRefreshState extends State<HorizontalRefresh>
   void _onRefresh() {
     Future.delayed(const Duration(milliseconds: 2009)).then((val) {
       _controller1.refreshCompleted();
-//                refresher.sendStatus(RefreshStatus.completed);
     });
   }
 
@@ -74,7 +75,6 @@ class _HorizontalRefreshState extends State<HorizontalRefresh>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controller1 = RefreshController();
     _fetch();
@@ -163,14 +163,10 @@ class _HorizontalRefreshState extends State<HorizontalRefresh>
       ],
     );
   }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => false;
 }
 
 class Item1 extends StatefulWidget {
-  final String url;
+  final String? url;
 
   Item1({this.url});
 
@@ -181,18 +177,16 @@ class Item1 extends StatefulWidget {
 class _ItemState extends State<Item1> {
   @override
   Widget build(BuildContext context) {
-    if (widget.url == null) return Container();
     return FadeInImage(
       placeholder: AssetImage("images/empty.png"),
       image: NetworkImage(
-        widget.url,
+        widget.url!,
       ),
     );
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 }
