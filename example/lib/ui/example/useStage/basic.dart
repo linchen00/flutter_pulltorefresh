@@ -8,9 +8,10 @@
   the basic usage
 */
 
-import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import '../../Item.dart';
 
 /*
@@ -125,7 +126,7 @@ class OnlyListView extends StatefulWidget {
 class _OnlyListViewState extends State<OnlyListView> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  List<String> data = List.generate(9, (index) => "Item ${index + 1}");
   GlobalKey _contentKey = GlobalKey();
   GlobalKey _refresherKey = GlobalKey();
 
@@ -161,19 +162,22 @@ class _OnlyListViewState extends State<OnlyListView> {
       ),
       onRefresh: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-
-        for (int i = 0; i < 10; i++) {
-          data.add("Item $i");
-        }
-
-        if (mounted) setState(() {});
-        _refreshController.refreshCompleted();
-
+        if (!mounted) return;
+        setState(() {
+          data = List.generate(9, (index) => "Item ${index + 1}");
+        });
+        _refreshController.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
+        print("onLoading");
         await Future.delayed(Duration(milliseconds: 180));
-        if (mounted) setState(() {});
-        _refreshController.loadFailed();
+        if (!mounted) return;
+        setState(() {
+          for (int i = 0; i < 10; i++) {
+            data.add("Item ${data.length + 1}");
+          }
+        });
+        _refreshController.loadComplete();
       },
     );
   }
@@ -190,7 +194,7 @@ class OnlyGridView extends StatefulWidget {
 class _OnlyGridViewState extends State<OnlyGridView> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+  List<String> data = List.generate(9, (index) => "Item ${index + 1}");
 
   Widget buildCtn() {
     return GridView.builder(
@@ -213,22 +217,20 @@ class _OnlyGridViewState extends State<OnlyGridView> {
       header: ClassicHeader(),
       onRefresh: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-
-        if (data.length == 0) {
-          for (int i = 0; i < 10; i++) {
-            data.add("Item $i");
-          }
-        }
-        if (mounted) setState(() {});
-        _refreshController.refreshCompleted();
-
+        if (!mounted) return;
+        setState(() {
+          data = List.generate(9, (index) => "Item ${index + 1}");
+        });
+        _refreshController.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-        for (int i = 0; i < 10; i++) {
-          data.add("Item $i");
-        }
-        if (mounted) setState(() {});
+        if (!mounted) return;
+        setState(() {
+          for (int i = 0; i < 10; i++) {
+            data.add("Item ${data.length + 1}");
+          }
+        });
         _refreshController.loadComplete();
       },
     );
@@ -259,7 +261,7 @@ class _NoScrollableState extends State<NoScrollable> {
               color: Colors.redAccent,
               height: 200.0,
             ),
-            Text("标题"),
+            Text("数据条数：${data.length}"),
             Container(
               color: Colors.redAccent,
               height: 200.0,
@@ -289,21 +291,20 @@ class _NoScrollableState extends State<NoScrollable> {
       onRefresh: () async {
         await Future.delayed(Duration(milliseconds: 1000));
 
-        if (data.length == 0) {
-          for (int i = 0; i < 10; i++) {
-            data.add("Item $i");
-          }
-        }
-        if (mounted) setState(() {});
-        _refreshController.refreshCompleted();
-
+        if (!mounted) return;
+        setState(() {
+          data = List.generate(10, (index) => "Item ${index + 1}");
+        });
+        _refreshController.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-        for (int i = 0; i < 10; i++) {
-          data.add("Item $i");
-        }
-        if (mounted) setState(() {});
+        if (!mounted) return;
+        setState(() {
+          for (int i = 0; i < 10; i++) {
+            data.add("Item ${data.length + 1}");
+          }
+        });
         _refreshController.loadComplete();
       },
     );
@@ -321,7 +322,7 @@ class SliverAppBarWithList extends StatefulWidget {
 class _SliverAppBarWithListState extends State<SliverAppBarWithList> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+  List<String> data = List.generate(9, (index) => "Item ${index + 1}");
 
   Widget buildCtn() {
     return CustomScrollView(
@@ -350,22 +351,20 @@ class _SliverAppBarWithListState extends State<SliverAppBarWithList> {
       header: WaterDropHeader(),
       onRefresh: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-
-        if (data.length == 0) {
-          for (int i = 0; i < 10; i++) {
-            data.add("Item $i");
-          }
-        }
-        if (mounted) setState(() {});
-        _refreshController.refreshCompleted();
-
+        if (!mounted) return;
+        setState(() {
+          data = List.generate(9, (index) => "Item ${index + 1}");
+        });
+        _refreshController.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-        for (int i = 0; i < 10; i++) {
-          data.add("Item $i");
-        }
-        if (mounted) setState(() {});
+        if (!mounted) return;
+        setState(() {
+          for (int i = 0; i < 10; i++) {
+            data.add("Item ${data.length + 1}");
+          }
+        });
         _refreshController.loadComplete();
       },
     );
@@ -383,7 +382,7 @@ class GridAndList extends StatefulWidget {
 class _GridAndListState extends State<GridAndList> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+  List<String> data = List.generate(9, (index) => "Item ${index + 1}");
 
   Widget buildCtn() {
     return CustomScrollView(
@@ -418,22 +417,20 @@ class _GridAndListState extends State<GridAndList> {
       header: WaterDropHeader(),
       onRefresh: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-
-        if (data.length == 0) {
-          for (int i = 0; i < 10; i++) {
-            data.add("Item $i");
-          }
-        }
-        if (mounted) setState(() {});
-        _refreshController.refreshCompleted();
-
+        if (!mounted) return;
+        setState(() {
+          data = List.generate(9, (index) => "Item ${index + 1}");
+        });
+        _refreshController.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-        for (int i = 0; i < 10; i++) {
-          data.add("Item $i");
-        }
-        if (mounted) setState(() {});
+        if (!mounted) return;
+        setState(() {
+          for (int i = 0; i < 10; i++) {
+            data.add("Item ${data.length + 1}");
+          }
+        });
         _refreshController.loadComplete();
       },
     );
@@ -451,7 +448,7 @@ class SwiperAndList extends StatefulWidget {
 class _SwiperAndListState extends State<SwiperAndList> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+  List<String> data = List.generate(9, (index) => "Item ${index + 1}");
 
   Widget buildCtn() {
     return CustomScrollView(
@@ -493,21 +490,21 @@ class _SwiperAndListState extends State<SwiperAndList> {
       onRefresh: () async {
         await Future.delayed(Duration(milliseconds: 1000));
 
-        if (data.length == 0) {
-          for (int i = 0; i < 10; i++) {
-            data.add("Item $i");
-          }
-        }
-        if (mounted) setState(() {});
-        _refreshController.refreshCompleted();
-
+        if (!mounted) return;
+        setState(() {
+          data = List.generate(9, (index) => "Item ${index + 1}");
+        });
+        _refreshController.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
-        for (int i = 0; i < 10; i++) {
-          data.add("Item $i");
-        }
-        if (mounted) setState(() {});
+
+        if (!mounted) return;
+        setState(() {
+          for (int i = 0; i < 10; i++) {
+            data.add("Item ${data.length + 1}");
+          }
+        });
         _refreshController.loadComplete();
       },
     );

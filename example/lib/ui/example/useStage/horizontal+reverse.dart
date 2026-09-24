@@ -4,12 +4,7 @@
  * Time:  2019-06-24 17:23
  */
 
-import 'dart:async';
-import 'dart:convert' show json;
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as HTTP;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../../Item.dart';
@@ -23,43 +18,52 @@ class HorizontalRefresh extends StatefulWidget {
   _HorizontalRefreshState createState() => _HorizontalRefreshState();
 }
 
-class _HorizontalRefreshState extends State<HorizontalRefresh>
-    with TickerProviderStateMixin {
+class _HorizontalRefreshState extends State<HorizontalRefresh> {
   RefreshController _controller1 = RefreshController();
   RefreshController _controller2 = RefreshController();
-  int indexPage = 0;
-  List<String?> data = [];
+  static const int _pageSize = 10;
+  int _nextPage = 1;
+  int _refreshVersion = 0;
+  int _requestVersion = 0;
+  List<String> data = [];
+  List<String> reverseData = List.generate(10, (index) => "data ${index + 1}");
 
-  void _fetch() {
-    HTTP
-        .get(Uri.parse(
-            'https://gank.io/api/v2/data/category/Girl/type/Girl/page/$indexPage/count/10'))
-        .then((HTTP.Response response) {
-      Map map = json.decode(response.body);
-      return map["data"];
-    }).then((array) {
-      for (var item in array) {
-        data.add(item["url"]);
+  Future<void> _fetch({bool refresh = false, bool loading = false}) async {
+    final requestVersion = ++_requestVersion;
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted || requestVersion != _requestVersion) return;
+
+    final page = refresh ? 1 : _nextPage;
+    final refreshVersion = refresh ? _refreshVersion + 1 : _refreshVersion;
+    final newItems = List.generate(
+      _pageSize,
+      (index) =>
+          'https://picsum.photos/seed/pull-refresh-$refreshVersion-$page-$index/300/200',
+    );
+
+    setState(() {
+      if (refresh) {
+        data = newItems;
+        _refreshVersion = refreshVersion;
+      } else {
+        data.addAll(newItems);
       }
-      if (mounted) setState(() {});
-      _controller1.loadComplete();
-      indexPage++;
-    }).catchError((_) {
-      print("error");
-      _controller1.loadComplete();
+      _nextPage = page + 1;
     });
+
+    if (refresh) {
+      _controller1.refreshCompleted(resetFooterState: true);
+    } else if (loading) {
+      _controller1.loadComplete();
+    }
   }
 
   void _onRefresh() {
-    Future.delayed(const Duration(milliseconds: 2009)).then((val) {
-      _controller1.refreshCompleted();
-    });
+    _fetch(refresh: true);
   }
 
   void _onLoading() {
-    Future.delayed(const Duration(milliseconds: 2009)).then((val) {
-      _fetch();
-    });
+    _fetch(loading: true);
   }
 
   Widget buildImage(context, index) {
@@ -129,7 +133,13 @@ class _HorizontalRefreshState extends State<HorizontalRefresh>
               enablePullUp: true,
               controller: _controller2,
               onRefresh: () async {
-                _controller2.refreshCompleted();
+                await Future.delayed(const Duration(milliseconds: 1000));
+                if (!mounted) return;
+                setState(() {
+                  reverseData =
+                      List.generate(10, (index) => "data ${index + 1}");
+                });
+                _controller2.refreshCompleted(resetFooterState: true);
               },
               footer: ClassicFooter(
                 iconPos: IconPosition.top,
@@ -145,16 +155,19 @@ class _HorizontalRefreshState extends State<HorizontalRefresh>
               header: WaterDropMaterialHeader(),
               onLoading: () async {
                 await Future.delayed(const Duration(milliseconds: 1000));
-                if (mounted) setState(() {});
+                if (!mounted) return;
+                setState(() {
+                  for (int i = 0; i < 10; i++) {
+                    reverseData.add("data ${reverseData.length + 1}");
+                  }
+                });
                 _controller2.loadComplete();
               },
               child: ListView.builder(
                 reverse: true,
-                itemCount: data.length,
+                itemCount: reverseData.length,
                 physics: ClampingScrollPhysics(),
-                itemBuilder: (c, i) => Item(
-                  title: "data $i",
-                ),
+                itemBuilder: (c, i) => Item(title: reverseData[i]),
               ),
             ),
             height: 200.0,

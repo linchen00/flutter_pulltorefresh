@@ -23,6 +23,7 @@ class RefreshWithEmptyView extends StatefulWidget {
 
 class _RefreshWithEmptyViewState extends State<RefreshWithEmptyView> {
   List<String> data = [];
+  static const int _pageSize = 10;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
@@ -53,11 +54,21 @@ class _RefreshWithEmptyViewState extends State<RefreshWithEmptyView> {
       enablePullDown: true,
       onRefresh: () async {
         await Future.delayed(const Duration(milliseconds: 2000));
-        if (mounted)
-          setState(() {
-            data.add("new");
-          });
-        _refreshController.refreshCompleted();
+        if (!mounted) return;
+        setState(() {
+          data = List.generate(_pageSize, (index) => "Item ${index + 1}");
+        });
+        _refreshController.refreshCompleted(resetFooterState: true);
+      },
+      onLoading: () async {
+        await Future.delayed(const Duration(milliseconds: 1000));
+        if (!mounted) return;
+        setState(() {
+          for (int i = 0; i < _pageSize; i++) {
+            data.add("Item ${data.length + 1}");
+          }
+        });
+        _refreshController.loadComplete();
       },
       child: data.length == 0
           ? buildEmpty()

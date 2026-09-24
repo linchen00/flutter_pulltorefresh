@@ -53,9 +53,11 @@ class HideFooterManualState extends State<HideFooterManual> {
                     _controller.loadComplete();
                   },
                   onRefresh: () {
-                    strs.add("new");
-                    if (mounted) setState(() {});
-                    _controller.refreshCompleted();
+                    Future.delayed(const Duration(milliseconds: 500)).then((_) {
+                      if (!mounted) return;
+                      setState(() => strs = ["1", "2"]);
+                      _controller.refreshCompleted(resetFooterState: true);
+                    });
                   },
                   child: CustomScrollView(
                     slivers: <Widget>[

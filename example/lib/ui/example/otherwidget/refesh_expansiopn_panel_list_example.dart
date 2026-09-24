@@ -19,13 +19,37 @@ class RefreshExpansionPanelListState extends State<RefreshExpansionPanelList> {
   RefreshController _controller = RefreshController();
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: _controller,
-      child: ListView(
-        shrinkWrap: true,
-        children: <Widget>[_buildPanel()],
+    return Scaffold(
+      appBar: AppBar(),
+      body: SmartRefresher(
+        controller: _controller,
+        onRefresh: () async {
+          await Future.delayed(const Duration(milliseconds: 600));
+          if (!mounted) return;
+          setState(() => _data = generateItems(10));
+          _controller.refreshCompleted(resetFooterState: true);
+        },
+        onLoading: () async {
+          await Future.delayed(const Duration(milliseconds: 600));
+          if (!mounted) return;
+          setState(() {
+            final start = _data.length;
+            _data.addAll(List.generate(
+              5,
+              (index) => Item(
+                headerValue: 'Panel ${start + index}',
+                expandedValue: 'This is item number ${start + index}',
+              ),
+            ));
+          });
+          _controller.loadComplete();
+        },
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[_buildPanel()],
+        ),
+        enablePullUp: true,
       ),
-      enablePullUp: true,
     );
   }
 

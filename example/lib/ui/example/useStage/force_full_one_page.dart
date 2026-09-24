@@ -102,8 +102,20 @@ class FillEmptyCustomScrollView extends prefix0.CustomScrollView {
   }
 }
 
-class ForceFullExample extends StatelessWidget {
+class ForceFullExample extends StatefulWidget {
+  @override
+  State<ForceFullExample> createState() => _ForceFullExampleState();
+}
+
+class _ForceFullExampleState extends State<ForceFullExample> {
   final RefreshController _refreshController = RefreshController();
+  int _itemCount = 0;
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,10 +124,14 @@ class ForceFullExample extends StatelessWidget {
       enablePullUp: true,
       onRefresh: () async {
         await Future.delayed(const Duration(milliseconds: 500));
-        _refreshController.refreshCompleted();
+        if (!mounted) return;
+        setState(() => _itemCount = 0);
+        _refreshController.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(const Duration(milliseconds: 500));
+        if (!mounted) return;
+        setState(() => _itemCount += 10);
         _refreshController.loadComplete();
       },
       footer: ClassicFooter(
@@ -128,7 +144,13 @@ class ForceFullExample extends StatelessWidget {
           SliverToBoxAdapter(
             child: Text(
                 "有很多时候,不满一屏时,会出现很多问题,比如底部指示器加载触发只能隐藏回去,而不能在底部卡着显示,等加载完毕再隐藏回去,解决这个问题,我们可以通过把Viewport剩余空间给填充满,来达到底部能看到的效果。"),
-          )
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => ListTile(title: Text('Item ${index + 1}')),
+              childCount: _itemCount,
+            ),
+          ),
         ],
       ),
     );

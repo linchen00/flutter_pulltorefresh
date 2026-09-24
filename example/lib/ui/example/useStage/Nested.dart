@@ -110,13 +110,15 @@ class _RefreshListViewState extends State<RefreshListView> {
   void _onRefresh() async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
-    // if failed,use refreshFailed()
-    _refreshController.refreshCompleted();
+    if (!mounted) return;
+    setState(() => items = List.generate(8, (index) => "${index + 1}"));
+    _refreshController.refreshCompleted(resetFooterState: true);
   }
 
   void _onLoading() async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 250));
+    if (!mounted) return;
     // if failed,use loadFailed(),if no data return,use LoadNodata()
     items.add((items.length + 1).toString());
     if (mounted) setState(() {});

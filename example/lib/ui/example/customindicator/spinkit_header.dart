@@ -68,10 +68,13 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
         controller: _refreshController,
         onRefresh: () async {
           await Future.delayed(Duration(milliseconds: 1000));
-          _refreshController.refreshCompleted();
+          if (!mounted) return;
+          setState(() => count = 20);
+          _refreshController.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 1000));
+          if (!mounted) return;
           count += 4;
           setState(() {});
           _refreshController.loadComplete();
@@ -124,7 +127,8 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
         header: CustomHeader(
           refreshStyle: RefreshStyle.Behind,
           onOffsetChange: (offset) {
-            if (_refreshController.headerMode!.value != RefreshStatus.refreshing)
+            if (_refreshController.headerMode!.value !=
+                RefreshStatus.refreshing)
               _scaleController!.value = offset / 80.0;
           },
           builder: (c, m) {

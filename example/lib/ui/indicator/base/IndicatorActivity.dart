@@ -37,9 +37,10 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
   late RefreshController _refreshController;
 
   void _init() {
+    items.clear();
     for (int i = 0; i < 15; i++) {
       items.add(Item(
-        title: "Data$i",
+        title: "Data ${i + 1}",
       ));
     }
   }
@@ -94,15 +95,21 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
   _onRefresh() {
     print("onRefresh");
     Future.delayed(Duration(milliseconds: 1000)).then((_) {
-      items.add(Item(title: "Data"));
-      if (mounted) setState(() {});
-      _refreshController.refreshCompleted();
+      if (!mounted) return;
+      setState(_init);
+      _refreshController.refreshCompleted(resetFooterState: true);
     });
   }
 
   _onLoading(BuildContext context) {
     print("onLoading");
     Future.delayed(Duration(milliseconds: 1000)).then((_) {
+      if (!mounted) return;
+      setState(() {
+        for (int i = 0; i < 10; i++) {
+          items.add(Item(title: "Data ${items.length + 1}"));
+        }
+      });
       _refreshController.loadComplete();
     });
   }

@@ -23,6 +23,8 @@ class _ConvertFooterState extends State<ConvertFooter> {
 
   List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
+  int _nextItem = 11;
+
   Widget buildCtn() {
     return ListView.separated(
       physics: ClampingScrollPhysics(),
@@ -50,16 +52,20 @@ class _ConvertFooterState extends State<ConvertFooter> {
         context: context,
         child: SmartRefresher(
           enablePullUp: true,
+          enablePullDown: false,
           footer: ClassicFooter(
             loadStyle: LoadStyle.ShowWhenLoading,
           ),
           child: buildCtn(),
           onLoading: () async {
             await Future.delayed(Duration(milliseconds: 1000));
-            for (int i = 0; i < 5; i++) data.add("1");
-
-            setState(() {});
-            _refreshController.loadFailed();
+            if (!mounted) return;
+            setState(() {
+              for (int i = 0; i < 5; i++) {
+                data.add("${_nextItem++}");
+              }
+            });
+            _refreshController.loadComplete();
           },
           controller: _refreshController,
         ),

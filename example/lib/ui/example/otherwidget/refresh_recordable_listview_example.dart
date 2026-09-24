@@ -246,6 +246,31 @@ class _ListDemoState extends State<ReorderableListDemo> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: _items.map<Widget?>(buildListTile).toList(),
           refreshController: _refreshController,
+          onRefresh: () async {
+            await Future.delayed(const Duration(milliseconds: 800));
+            if (!mounted) return;
+            setState(() {
+              _items
+                ..clear()
+                ..addAll('ABCDEFGHIJKLMN'
+                    .split('')
+                    .map((value) => _ListItem(value, false)));
+              _reverseSort = false;
+            });
+            _refreshController.refreshCompleted(resetFooterState: true);
+          },
+          onLoading: () async {
+            await Future.delayed(const Duration(milliseconds: 800));
+            if (!mounted) return;
+            setState(() {
+              final start = _items.length;
+              for (int i = 0; i < 5; i++) {
+                _items.add(_ListItem('Item ${start + i + 1}', false));
+              }
+            });
+            _refreshController.loadComplete();
+          },
+          enablePullUp: true,
         ),
       ),
     );

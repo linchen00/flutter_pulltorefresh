@@ -59,8 +59,7 @@ class _DraggableLoadingBottomSheetState
                                 controller: scrollController,
                                 separatorBuilder: (c, i) => Divider(),
                                 itemBuilder: (_, e) => Container(
-                                  child:
-                                      Center(child: Text("菜单" + e.toString())),
+                                  child: Center(child: Text(items[e])),
                                   height: 40.0,
                                 ),
                                 physics: ClampingScrollPhysics(),
@@ -70,12 +69,12 @@ class _DraggableLoadingBottomSheetState
                               onLoading: () async {
                                 await Future.delayed(
                                     Duration(milliseconds: 1000));
-                                _controller.loadComplete();
+                                if (!mounted) return;
                                 for (int i = 0; i < 15; i++) {
-                                  items.add("1");
+                                  items.add("数据 ${items.length + 1}");
                                 }
-
                                 setter(() {});
+                                _controller.loadComplete();
                               },
                               enablePullUp: true,
                               enablePullDown: false,

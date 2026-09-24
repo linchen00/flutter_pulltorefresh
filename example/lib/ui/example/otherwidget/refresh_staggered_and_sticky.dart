@@ -5,8 +5,8 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 /*
    use refresh with StaggeredGridView or StickyHeader
@@ -136,32 +136,39 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
       mainAxisSpacing: 4.0,
       crossAxisSpacing: 4.0,
     ));
-    return LayoutBuilder(
-      builder: (i, c) {
-        return SmartRefresher(
-          enablePullUp: true,
-          enablePullDown: true,
-          controller: _refreshController,
-          header: MaterialClassicHeader(),
-          onRefresh: () async {
-            print("onRefresh");
-            await Future.delayed(const Duration(milliseconds: 4000));
-            if (mounted) setState(() {});
-            _refreshController.refreshFailed();
-          },
-          child: CustomScrollView(
-            slivers: slivers,
-          ),
-          onLoading: () {
-            print("onload");
-            Future.delayed(const Duration(milliseconds: 2000)).then((val) {
-              length += 10;
+    return Scaffold(
+      appBar: AppBar(),
+      body: LayoutBuilder(
+        builder: (i, c) {
+          return SmartRefresher(
+            enablePullUp: true,
+            enablePullDown: true,
+            controller: _refreshController,
+            header: MaterialClassicHeader(),
+            onRefresh: () async {
+              print("onRefresh");
+              await Future.delayed(const Duration(milliseconds: 4000));
+              if (!mounted) return;
+              length = 10;
+              expand = List.filled(expand.length, false);
               if (mounted) setState(() {});
-              _refreshController.loadComplete();
-            });
-          },
-        );
-      },
+              _refreshController.refreshCompleted(resetFooterState: true);
+            },
+            child: CustomScrollView(
+              slivers: slivers,
+            ),
+            onLoading: () {
+              print("onload");
+              Future.delayed(const Duration(milliseconds: 2000)).then((val) {
+                if (!mounted) return;
+                length += 10;
+                if (mounted) setState(() {});
+                _refreshController.loadComplete();
+              });
+            },
+          );
+        },
+      ),
     );
   }
 }

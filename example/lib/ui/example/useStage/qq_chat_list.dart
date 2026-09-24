@@ -94,6 +94,7 @@ class _QQChatListState extends State<QQChatList> {
                     enablePullDown: false,
                     onLoading: () async {
                       await Future.delayed(Duration(milliseconds: 1000));
+                      if (!mounted) return;
                       data.add(_MessageItem(
                         content: "Xxxxxxxxxxxxxx",
                         isMe: true,

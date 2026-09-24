@@ -4,25 +4,26 @@
  * Time:  2019-06-24 17:21
  */
 import 'package:example/ui/example/customindicator/footer_underscroll.dart';
-import 'package:example/ui/example/customindicator/shimmer_indicator.dart';
-import 'package:example/ui/example/useStage/force_full_one_page.dart';
-import 'package:flutter/material.dart';
-import 'otherwidget/refresh_staggered_and_sticky.dart';
-import 'package:example/ui/example/useStage/empty_view.dart';
-import 'customindicator/gif_indicator_example1.dart';
-import 'package:example/ui/example/useStage/hidefooter_bycontent.dart';
-import 'package:example/ui/example/otherwidget/refesh_expansiopn_panel_list_example.dart';
-import 'package:example/ui/example/useStage/horizontal+reverse.dart';
-import 'package:example/ui/example/useStage/Nested.dart';
-import 'package:example/ui/example/otherwidget/refresh_animatedlist_example.dart';
-import 'package:example/ui/example/customindicator/spinkit_header.dart';
-import 'package:example/ui/example/useStage/basic.dart';
-import 'package:example/ui/example/otherwidget/refresh_pageView_example.dart';
 import 'package:example/ui/example/customindicator/link_header_example.dart';
+import 'package:example/ui/example/customindicator/shimmer_indicator.dart';
+import 'package:example/ui/example/customindicator/spinkit_header.dart';
+import 'package:example/ui/example/otherwidget/refesh_expansiopn_panel_list_example.dart';
+import 'package:example/ui/example/otherwidget/refresh_animatedlist_example.dart';
+import 'package:example/ui/example/otherwidget/refresh_pageView_example.dart';
+import 'package:example/ui/example/useStage/Nested.dart';
+import 'package:example/ui/example/useStage/basic.dart';
+import 'package:example/ui/example/useStage/empty_view.dart';
+import 'package:example/ui/example/useStage/force_full_one_page.dart';
+import 'package:example/ui/example/useStage/hidefooter_bycontent.dart';
+import 'package:example/ui/example/useStage/horizontal+reverse.dart';
 import 'package:example/ui/example/useStage/twolevel_refresh.dart';
-import 'useStage/qq_chat_list.dart';
-import 'otherwidget/refresh_recordable_listview_example.dart';
+import 'package:flutter/material.dart';
+
+import 'customindicator/gif_indicator_example1.dart';
 import 'otherwidget/draggable_bottomsheet_loadmore.dart';
+import 'otherwidget/refresh_recordable_listview_example.dart';
+import 'otherwidget/refresh_staggered_and_sticky.dart';
+import 'useStage/qq_chat_list.dart';
 import 'useStage/tapbutton_refresh.dart';
 
 class ExamplePage extends StatefulWidget {
@@ -156,60 +157,42 @@ class _ExamplePageState extends State<ExamplePage>
           title: "animatedlist结合refresher",
           onClick: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return Scaffold(
-                body: AnimatedListExample(),
-                appBar: AppBar(),
-              );
+              return AnimatedListExample();
             }));
           }),
       ExampleItem(
           title: "ExpansionPanelList配合使用",
           onClick: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return Scaffold(
-                appBar: AppBar(),
-                body: RefreshExpansionPanelList(),
-              );
+              return RefreshExpansionPanelList();
             }));
           }),
       ExampleItem(
           title: "loadmore+draggablesheet",
           onClick: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return Scaffold(
-                appBar: AppBar(),
-                body: DraggableLoadingBottomSheet(),
-              );
+              return DraggableLoadingBottomSheet();
             }));
           }),
       ExampleItem(
           title: "stickyHeader+StaggeredGridView",
           onClick: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return Scaffold(
-                appBar: AppBar(),
-                body: RefreshStaggeredAndSticky(),
-              );
+              return RefreshStaggeredAndSticky();
             }));
           }),
       ExampleItem(
           title: "pageView共用SmartRefresher",
           onClick: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return Scaffold(
-                body: PageViewExample(),
-                appBar: AppBar(),
-              );
+              return PageViewExample();
             }));
           }),
       ExampleItem(
           title: "RecordableListView",
           onClick: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return Scaffold(
-                body: ReorderableListDemo(),
-                appBar: AppBar(),
-              );
+              return ReorderableListDemo();
             }));
           }),
     ];

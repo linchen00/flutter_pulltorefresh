@@ -12,6 +12,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import '../../Item.dart';
 
 class LinkHeaderExample extends StatefulWidget {
@@ -66,7 +67,12 @@ class _LinkHeaderExampleState extends State<LinkHeaderExample> {
                     header: LinkHeader(linkKey: linkKey),
                     onRefresh: () async {
                       await Future.delayed(Duration(milliseconds: 3000));
-                      _refreshController.refreshCompleted();
+                      if (!mounted) return;
+                      setState(() {
+                        data = List.generate(9, (index) => "${index + 1}");
+                      });
+                      _refreshController.refreshCompleted(
+                          resetFooterState: true);
                     },
                     child: CustomScrollView(
                       controller: _scrollController,

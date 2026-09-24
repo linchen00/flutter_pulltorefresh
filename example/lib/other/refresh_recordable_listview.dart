@@ -267,13 +267,17 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
   bool _scrolling = false;
 
   double get _dropAreaExtent {
+    final Size? feedbackSize = _draggingFeedbackSize;
+    if (feedbackSize == null) {
+      return _defaultDropAreaExtent;
+    }
     double dropAreaWithoutMargin;
     switch (widget.scrollDirection) {
       case Axis.horizontal:
-        dropAreaWithoutMargin = _draggingFeedbackSize!.width;
+        dropAreaWithoutMargin = feedbackSize.width;
         break;
       case Axis.vertical:
-        dropAreaWithoutMargin = _draggingFeedbackSize!.height;
+        dropAreaWithoutMargin = feedbackSize.height;
         break;
     }
     return dropAreaWithoutMargin + _dropAreaMargin;
@@ -365,12 +369,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
 
   // Wraps children in Row or Column, so that the children flow in
   // the widget's scrollDirection.
-  Widget _buildContainerForScrollDirection({List<Widget?>? children}) {
+  Widget _buildContainerForScrollDirection({required List<Widget> children}) {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
-        return Row(children: children as List<Widget>);
+        return Row(children: children);
       case Axis.vertical:
-        return Column(children: children as List<Widget>);
+        return Column(children: children);
     }
   }
 
@@ -560,13 +564,17 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
         builder: buildDragTarget,
         onWillAcceptWithDetails: (DragTargetDetails<Key> details) {
           final Key toAccept = details.data;
+          // The drag avatar checks its initial target before onDragStarted runs.
+          // Ignore that check until the dragged item has been initialized.
+          if (_dragging != toAccept || toAccept == toWrap.key) {
+            return false;
+          }
           setState(() {
             _nextIndex = index;
             _requestAnimationToNextIndex();
           });
           _scrollTo(context);
-          // If the target is not the original starting point, then we will accept the drop.
-          return _dragging == toAccept && toAccept != toWrap.key;
+          return true;
         },
         onAcceptWithDetails: (DragTargetDetails<Key> details) {},
         onLeave: (_) {},
@@ -579,8 +587,11 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-      final List<Widget?> wrappedChildren = <Widget?>[];
-      wrappedChildren.add(widget.header);
+      final List<Widget> wrappedChildren = <Widget>[];
+      final header = widget.header;
+      if (header != null) {
+        wrappedChildren.add(header);
+      }
       for (int i = 0; i < widget.children.length; i += 1) {
         wrappedChildren.add(_wrap(widget.children[i]!, i, constraints));
       }

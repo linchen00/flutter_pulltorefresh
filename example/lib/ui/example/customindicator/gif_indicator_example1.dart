@@ -158,6 +158,7 @@ class GifIndicatorExample1 extends StatefulWidget {
 
 class GifIndicatorExample1State extends State<GifIndicatorExample1> {
   RefreshController _controller = RefreshController();
+  int _itemCount = 50;
   @override
   Widget build(BuildContext context) {
     return RefreshConfiguration.copyAncestor(
@@ -171,15 +172,19 @@ class GifIndicatorExample1State extends State<GifIndicatorExample1> {
         footer: GifFooter1(),
         onRefresh: () async {
           await Future.delayed(Duration(milliseconds: 2000));
-          _controller.refreshCompleted();
+          if (!mounted) return;
+          setState(() => _itemCount = 50);
+          _controller.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 2000));
-          _controller.loadFailed();
+          if (!mounted) return;
+          setState(() => _itemCount += 10);
+          _controller.loadComplete();
         },
         child: ListView.builder(
           itemBuilder: (c, q) => Card(),
-          itemCount: 50,
+          itemCount: _itemCount,
           itemExtent: 100.0,
         ),
       ),

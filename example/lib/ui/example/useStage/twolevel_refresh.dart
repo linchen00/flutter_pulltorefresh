@@ -29,6 +29,7 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
   RefreshController _refreshController1 = RefreshController();
   RefreshController _refreshController2 = RefreshController();
   int _tabIndex = 0;
+  int _loadedItemCount = 0;
 
   @override
   void initState() {
@@ -103,7 +104,8 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
                                       _refreshController1.requestTwoLevel();
                                     },
                                     child: Text("点击这里打开二楼!"),
-                                  )
+                                  ),
+                                  Text("已加载数据：$_loadedItemCount 条"),
                                 ],
                               ),
                             ),
@@ -118,11 +120,16 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
                     enablePullUp: true,
                     onLoading: () async {
                       await Future.delayed(Duration(milliseconds: 2000));
+                      if (!mounted) return;
+                      setState(() => _loadedItemCount += 10);
                       _refreshController1.loadComplete();
                     },
                     onRefresh: () async {
                       await Future.delayed(Duration(milliseconds: 2000));
-                      _refreshController1.refreshCompleted();
+                      if (!mounted) return;
+                      setState(() => _loadedItemCount = 0);
+                      _refreshController1.refreshCompleted(
+                          resetFooterState: true);
                     },
                     onTwoLevel: (bool isOpen) {
                       print("twoLevel opening:" + isOpen.toString());

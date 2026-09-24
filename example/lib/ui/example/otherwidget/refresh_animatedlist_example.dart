@@ -15,7 +15,8 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
       new GlobalKey<SliverAnimatedListState>();
   late ListModel<int?> _list;
   int? _selectedItem;
-  int? _nextItem; // The next item inserted when the user presses the '+' button.
+  int?
+      _nextItem; // The next item inserted when the user presses the '+' button.
 
   @override
   void initState() {
@@ -62,8 +63,7 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
   // Insert the "next item" into the list model.
   void _insert() {
     for (int i = 0; i < 5; i++) {
-      final int index =
-          _list.indexOf(_selectedItem);
+      final int index = _list.indexOf(_selectedItem);
       final int item = _nextItem!;
       _nextItem = item + 1;
       _list.insert(index, item);
@@ -111,12 +111,24 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
         ),
         onRefresh: () async {
           await Future.delayed(Duration(milliseconds: 500));
-          _list.insert(0, 0);
-          _refreshController.refreshFailed();
+          if (!mounted) return;
+          for (int i = _list.length - 1; i >= 0; i--) {
+            _list.removeAt(i);
+          }
+          _selectedItem = null;
+          for (int i = 0; i < 3; i++) {
+            _list.insert(i, _nextItem!);
+            _nextItem = _nextItem! + 1;
+          }
+          _refreshController.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 500));
-          _list.insert(_list.length, _list.length);
+          if (!mounted) return;
+          for (int i = 0; i < 5; i++) {
+            _list.insert(_list.length, _nextItem!);
+            _nextItem = _nextItem! + 1;
+          }
           _refreshController.loadComplete();
         },
         enablePullUp: true,

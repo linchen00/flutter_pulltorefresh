@@ -68,16 +68,21 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
         header: ClassicHeader(),
         onRefresh: () async {
           await Future.delayed(const Duration(milliseconds: 2000));
-          if (mounted)
-            setState(() {
-              data.add("new");
-              data.add("new");
-              data.add("new");
-              data.add("new");
-              data.add("new");
-              data.add("new");
-            });
-          _refreshController.refreshCompleted();
+          if (!mounted) return;
+          setState(() {
+            data = List.generate(6, (index) => "Item ${index + 1}");
+          });
+          _refreshController.refreshCompleted(resetFooterState: true);
+        },
+        onLoading: () async {
+          await Future.delayed(const Duration(milliseconds: 1000));
+          if (!mounted) return;
+          setState(() {
+            for (int i = 0; i < 6; i++) {
+              data.add("Item ${data.length + 1}");
+            }
+          });
+          _refreshController.loadComplete();
         },
         child: data.length == 0
             ? buildEmpty()

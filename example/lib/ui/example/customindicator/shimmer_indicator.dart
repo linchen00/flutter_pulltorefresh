@@ -25,7 +25,7 @@ class ShimmerIndicatorExample extends StatefulWidget {
  */
 class _ShimmerIndicatorExampleState extends State<ShimmerIndicatorExample> {
   RefreshController _refreshController = RefreshController();
-  List<String> data = [
+  final List<String> _initialData = [
     "1",
     "2",
     "1",
@@ -39,6 +39,7 @@ class _ShimmerIndicatorExampleState extends State<ShimmerIndicatorExample> {
     "1",
     "2"
   ];
+  late List<String> data = List.of(_initialData);
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
@@ -63,14 +64,18 @@ class _ShimmerIndicatorExampleState extends State<ShimmerIndicatorExample> {
         ),
         onRefresh: () async {
           await Future.delayed(Duration(milliseconds: 2000));
-          _refreshController.refreshCompleted();
+          if (!mounted) return;
+          setState(() => data = List.of(_initialData));
+          _refreshController.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 2000));
-          for (int i = 0; i < 10; i++) {
-            data.add("1");
-          }
-          setState(() {});
+          if (!mounted) return;
+          setState(() {
+            for (int i = 0; i < 10; i++) {
+              data.add("${data.length + 1}");
+            }
+          });
           _refreshController.loadComplete();
         });
   }
