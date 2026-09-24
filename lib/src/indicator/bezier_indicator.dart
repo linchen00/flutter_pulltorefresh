@@ -306,7 +306,7 @@ class _BezierCircleHeaderState extends State<BezierCircleHeader>
     with TickerProviderStateMixin {
   RefreshStatus mode = RefreshStatus.idle;
   late AnimationController _childMoveCtl;
-  late Tween<AlignmentGeometry?> _childMoveTween;
+  late Tween<Alignment> _childMoveTween;
   late AnimationController _dismissCtrl;
   late Tween<Offset> _disMissTween;
   late AnimationController _radialCtrl;
@@ -317,7 +317,7 @@ class _BezierCircleHeaderState extends State<BezierCircleHeader>
     _childMoveCtl = AnimationController(vsync: this);
     _radialCtrl =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    _childMoveTween = AlignmentGeometryTween(
+    _childMoveTween = AlignmentTween(
         begin: Alignment.bottomCenter, end: Alignment.center);
     _disMissTween =
         Tween<Offset>(begin: Offset(0.0, 0.0), end: Offset(0.0, 1.5));
@@ -403,8 +403,7 @@ class _BezierCircleHeaderState extends State<BezierCircleHeader>
                   },
                   animation: _radialCtrl,
                 ),
-          alignment: _childMoveCtl
-              .drive(_childMoveTween as Animatable<AlignmentGeometry>),
+          alignment: _childMoveCtl.drive(_childMoveTween),
         ),
       ),
     );
