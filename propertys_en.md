@@ -1,89 +1,113 @@
+# API and defaults
 
-# SmartRefresher
+This document describes this checkout: Dart ≥3.0 and Flutter ≥3.32. The package version remains `2.0.0`; see [pubspec.yaml](pubspec.yaml) for this checkout's SDK requirements.
 
-| Attribute Name     |     Attribute Explain     | Parameter Type | Default Value  | requirement |
-|---------|--------------------------|:-----:|:-----:|:-----:|
-| controller | controll inner headerMode and footerMode  | RefreshController | null | necessary |
-| child      | your content  Widget   | ? extends Wiget   |   null |  optional |
-| header | refresh indicator  | ? extends Widget  | ClassicHeader | optional|
-| footer | load indicator     | ? extends Widget | ClassicFooter | optional |
-| enablePullDown | switch of pulldownrefresh     | boolean | true | optional |
-| enableTwoLevel |   whether to open the function of twoLevel for header | boolean | false | 可选 |
-| enablePullUp |   switch of pullupload | boolean | false | optional |
-| onRefresh | callback when refreshing  | () => Void | null | optional |
-| onLoading | callback when loading   | () => Void | null | optional |
-| onOffsetChange(2.0.0 removed) | callBack the Visible range of indicator  | (bool,double) => Void | null | optional |
-| onTwoLevel | callback when second floor is opening   | () => Void | null | 可选 |
+## SmartRefresher
 
+| Property | Type | Default / behavior |
+|---|---|---|
+| controller | RefreshController | Required; one controller per SmartRefresher |
+| child | Widget? | null; ScrollView, Scrollable and ordinary widgets use different paths; see [integration](README.md#child) |
+| header | Widget? | Explicit header, then headerBuilder; otherwise ClassicHeader on iOS and MaterialClassicHeader elsewhere |
+| footer | Widget? | Explicit footer, then footerBuilder; otherwise ClassicFooter |
+| enablePullDown | bool | true |
+| enablePullUp | bool | false |
+| enableTwoLevel | bool | false |
+| onRefresh | VoidCallback? | Called on entry to refreshing; finish through the controller |
+| onLoading | VoidCallback? | Called on entry to loading; finish through the controller |
+| onTwoLevel | void Function(bool)? | true when opening, false when closing |
 
-# RefreshController Api
+The ordinary constructor also accepts `scrollDirection`, `reverse`, `scrollController`, `primary`, `physics`, `cacheExtent`, `semanticChildCount` and `dragStartBehavior`. With a direct ScrollView child, non-null overrides take precedence over its matching properties. The rebuilt view also inherits center, anchor, keyboard dismissal, restoration ID and clipping, but does not copy every ScrollView property, such as shrinkWrap.
 
+`SmartRefresher.builder` supplies `(BuildContext context, RefreshPhysics physics)`. Pass physics to the scrollable and insert header/footer into its slivers yourself; this constructor does not insert indicators.
+
+## RefreshController
+
+```dart
+RefreshController({
+  bool initialRefresh = false,
+  RefreshStatus? initialRefreshStatus,
+  LoadStatus? initialLoadStatus,
+});
+
+Future<void>? requestRefresh({
+  bool needMove = true,
+  bool needCallback = true,
+  Duration duration = const Duration(milliseconds: 500),
+  Curve curve = Curves.linear,
+});
+
+Future<void>? requestLoading({
+  bool needMove = true,
+  bool needCallback = true,
+  Duration duration = const Duration(milliseconds: 300),
+  Curve curve = Curves.linear,
+});
+
+Future<void> requestTwoLevel({
+  Duration duration = const Duration(milliseconds: 300),
+  Curve curve = Curves.linear,
+});
+
+void refreshCompleted({bool resetFooterState = false});
+void refreshFailed();
+void refreshToIdle();
+Future<void>? twoLevelComplete({
+  Duration duration = const Duration(milliseconds: 500),
+  Curve curve = Curves.linear,
+});
+void loadComplete();
+void loadFailed();
+void loadNoData();
+void resetNoData();
+void dispose();
 ```
-      //  Request top indicator refresh to trigger onRefresh
-      void requestRefresh(
-          {Duration duration: const Duration(milliseconds: 300),
-          Curve curve: Curves.linear});
-     // Request bottom indicator to load data and trigger onLoading
-      void requestLoading(
-          {Duration duration: const Duration(milliseconds: 300),
-          Curve curve: Curves.linear}) ;
-      // Top Indicator Refresh Success
-      void refreshCompleted({});
-      // Top Indicator Refresh Failed
-      void refreshFailed();
-      // Bottom Indicator Loading Completed
-      // set to idle, and hide back
-      void refreshToIdle();
-       // close second floor
-       void twoLevelComplete(
-             {Duration duration: const Duration(milliseconds: 500),
-             Curve curve: Curves.linear};
-      void loadComplete();
-      // The bottom indicator enters a state without more data
-      void loadNoData();
-      // Refresh the bottom indicator status to idle
-      // footer load failed
-      void loadFailed()
-      void resetNoData();
 
-```
+These are signature references, not executable top-level function definitions.
 
-# RefreshConfiguration
+- initialRefresh requests refresh after the first frame. Both initial statuses default to idle; mounting the header resets headerMode to idle, so initialRefreshStatus is not a replacement for initialRefresh.
+- position becomes available when an indicator attaches to its ScrollPosition. Request operations after layout, with the corresponding indicator enabled.
+- needMove controls movement to the boundary. A returned Future covers the request/movement, not completion of your data request. Currently requestRefresh(needMove: false) and twoLevelComplete() return null; do not await them to track animations or data work.
+- needCallback: false currently works only with needMove: true. This branch changes status without notifying notifier listeners, also bypassing indicator hooks that depend on those notifications. With needMove: false, business callbacks still run.
+- loadComplete(), loadFailed() and loadNoData() update the footer after the frame, allowing data layout to complete and preventing duplicate loads.
+- resetNoData() resets only noMore to idle; refreshCompleted(resetFooterState: true) calls it.
+- Read headerStatus, footerStatus, isRefresh, isLoading and isTwoLevel, or listen to headerMode / footerMode. Use your own ScrollController for scroll listeners; RefreshController no longer exposes scrollController.
 
-| Attribute Name     |     Attribute Explain     | Parameter Type | Default Value  | requirement |
-|---------|--------------------------|:-----:|:-----:|:-----:|
-| child | you know,no need to explain  | Widget | null | 必要|
-| springDescription | custom spring animate config  | SpringDescription | default | 可选 |
-| dragSpeedRatio | the speed ratio when dragging overscroll ,compute=origin physics dragging speed *dragSpeedRatio  | double | 1.0 | 可选 |
+## RefreshConfiguration
 
-Refresh(header):
+An InheritedWidget configures its subtree. RefreshConfiguration.copyAncestor copies ancestor values and overrides non-null arguments; its context must have a RefreshConfiguration ancestor.
 
-| Attribute Name     |     Attribute Explain     | Parameter Type | Default Value  | requirement |
-|---------|--------------------------|:-----:|:-----:|:-----:|
-| headerBuilder | the header indicator builder  | () =>  ? extends RefreshIndicator | null | 可选 |
-| headerTriggerDistance | overScroll distance of  trigger refresh     | double | 80.0 | 可选 |
-| maxOverScrollExtent | max overScroll distance   | double | ios:inf,android:60 | 可选 |
-| skipCanRefresh | if skip canRefresh state,enter refreshing state directly  | bool | false | 可选 |
-| enableScrollWhenTwoLevel | whether enable scroll when into twoLevel   | bool | false | 可选 |
-| twiceTriggerDistance | the overScroll distance of trigger twoLevel  | double | 150.0 | 可选 |
-| closeTwoLevelDistance | Close the bottom crossing distance on the second floor, premise:enableScrollWhenTwoLevel is true  | double | 80.0 | 可选 |
-| enableBallisticRefresh | whether trigger refresh by BallisticScrollActivity(it mean use is not dragging on the screen)  | bool | false | 可选 |
-| enableScrollWhenRefreshCompleted | Whether the user is allowed to slide scrollable when the refresh is complete and ready to bounce back  | bool | true | 可选 |
-| topHitBoundary | When fast fling to top, setting a top boundary make the bouncing stop     | double | ios:inf,android:0 | 可选 |
+| Property | Type | Default / behavior |
+|---|---|---|
+| headerBuilder / footerBuilder | Widget Function()? | null; return indicators or compositions that build slivers |
+| springDescription | SpringDescription | mass: 1, stiffness: 364.71867768595047, damping: 35.2 |
+| dragSpeedRatio | double | 1.0; overscroll drag ratio, must be >0 |
+| headerTriggerDistance | double | 80.0; must be >0 |
+| skipCanRefresh | bool | false; true prepares refresh immediately at the threshold |
+| enableBallisticRefresh | bool | false |
+| enableScrollWhenRefreshCompleted | bool | false; dragging during completion/failure retraction |
+| twiceTriggerDistance | double | 150.0; must be >0 |
+| closeTwoLevelDistance | double | 80.0; must be >0 |
+| enableScrollWhenTwoLevel | bool | true |
+| footerTriggerDistance | double | 15.0; compares maxScrollExtent - pixels; negative values require bottom overscroll |
+| enableBallisticLoad | bool | true |
+| enableLoadingWhenFailed | bool | true |
+| enableLoadingWhenNoData | bool | false; gesture loading from noMore |
+| hideFooterWhenNotFull | bool | false; true hides the footer and disables gesture loading for short content, except noMore can remain visible |
+| shouldFooterFollowWhenNotFull | bool Function(LoadStatus?)? | null; by default only noMore follows content; other states sit at the viewport end |
+| maxOverScrollExtent | double? | null; resolves to ∞ for Bouncing, 60.0 otherwise |
+| maxUnderScrollExtent | double? | null; resolves to ∞ for Bouncing, 0.0 otherwise |
+| topHitBoundary / bottomHitBoundary | double? | null; ballistic boundaries resolve to ∞ for Bouncing, 0.0 otherwise |
+| enableRefreshVibrate / enableLoadMoreVibrate | bool | false |
 
+Overscroll defaults depend on the supplied physics and ScrollConfiguration, not solely the OS. Reachable drag distances also include indicator layout compensation; verify thresholds with your chosen indicator.
 
-Load more(footer):
+Currently updateShouldNotify does not compare headerBuilder, footerBuilder, springDescription, enableBallisticLoad, enableLoadingWhenNoData or shouldFooterFollowWhenNotFull. Changing only these fields does not automatically notify dependent widgets. Do not assume every configuration change applies immediately.
 
-| Attribute Name     |     Attribute Explain     | Parameter Type | Default Value  | requirement |
-|---------|--------------------------|:-----:|:-----:|:-----:|
-| footerBuilder      | the footer indicator builder   | () =>  ? extends LoadIndicator  |   null |  可选 |
-| hideWhenNotFull | whether to hide footer when scrollview not enough one page   | bool | true | 可选 |
-| autoLoad(2.0.0 removed) | Autoload more, if false, sliding bottom will not trigger, but provide more click loading methods  | bool | true | 可选 |
-| enableLoadingWhenFailed |  whether allowed to use gesture pull-up trigger to load more when failed state  | bool | true| 可选 |
-| enableLoadingWhenNoData |  whether allowed to use gesture pull-up trigger to load more when no more data state  | bool | false| 可选 |
-| maxUnderScrollExtent | max underScroll distance  | double | ios:inf,android:0 | 可选 |
-| footerTriggerDistance |   the extentAfter distance of  trigger loading  | double | 15.0 | 可选 |
+## States
 
-| enableBallisticRefresh | whether trigger loading by BallisticScrollActivity(it mean use is not dragging on the screen)  | bool | true | 可选 |
-| shouldFooterFollowWhenNotFull | When not full one page,If it should follow content for different status,premise: hideFooterWhenNotFull = false | (LoadStatus) => bool | () => false | 可选 |
-| bottomHitBoundary | When fast fling to bottom, setting a bottom boundary make the bouncing stop     | double | ios:inf,android:0 | 可选 |
+- Refresh: idle → canRefresh → refreshing → completed / failed → idle.
+- Two level: canTwoLevel → twoLevelOpening → twoLeveling → twoLevelClosing → idle.
+- Load: idle / failed → canLoading → loading → idle / failed / noMore. Ballistic loading and explicit requests can skip canLoading.
+
+SmartRefresher.onOffsetChange, RefreshConfiguration.autoLoad and RefreshController.scrollController have been removed. Put offset callbacks on custom indicators; see [custom indicators](custom_indicator_en.md).

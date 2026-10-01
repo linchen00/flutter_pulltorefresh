@@ -1,52 +1,49 @@
-1. <h3>怎么去监听ScrollView的位置变化啊?也就是要用到ScrollController.addListener?</h3>
-在child里的scrollView直接设置controller给它即可。
+# 常见问题
 
-2. <h3>在RefreshController暴露了position和scrollContorller目的是什么?</h3>
-首先,scrollController是先前的api就有的,后面改动的时候发现scrollController存在共用的问题,所以就弃用了,不打算删除,
-主要是可能有一部分人引用了它,删了就会造成有的人更新报错。而暴露这两个东西,主要是为了在某些情况下,不需要addListener,只需要
-控制跳转的情况。比如我实现聊天列表,我只需要控制ScrollView滚动到最下方,但我不需要监听它的位置的情况。
+## 如何监听或控制滚动？
 
-3. <h3>报错,有这个提示"Horizontal viewport was given unbounded height.",如何解决?</h3>
-有这个报错提示的话,一般都是因为在child没有限定高度,比如说PageView,你不能直接在child里放进去,你需要给予PageView
-一个高度的限制
+把自己的 ScrollController 传给直接作为 child 的 ScrollView，或传入 SmartRefresher.scrollController。RefreshController.position 在指示器挂载后可用于跳转；RefreshController.scrollController 已移除。
 
-4. <h3>我有一个需求,需要当不满一个屏幕,就禁用掉上拉加载，但是我不知道怎么计算ScrollView里的高度,每个item高度不一样,如何解决?</h3>
-在RefreshConfiguration有提供一个属性hideFooterWhenNotFull,绝大多数的情况,它可以帮你计算并判断是否隐藏。
+## 为什么看不到 header/footer？
 
-5. <h3>指示器支持自定义帧动画吗?比如,我想随着下拉拖动改变gif进度,到达某个状态开始循环播放</h3>
-支持。可使用 [gif_view](https://pub.dev/packages/gif_view) 跳转到指定 GIF 帧并控制播放。[示例](example/lib/ui/example/customindicator/gif_indicator_example1.dart)展示了在刷新或加载开始、结束时播放不同帧段。如果要让 GIF 帧随下拉距离变化，可在 `onOffsetChange` 中调用 `GifController.seek`。
+先检查 enablePullDown/enablePullUp，再检查 ListView 是否直接作为 child。如果外面套了 Container、Scrollbar 或自定义 Widget，会产生滚动嵌套。AnimatedList 使用 [SliverAnimatedList](example/lib/ui/example/otherwidget/refresh_animatedlist_example.dart)，排序列表参考 [适配示例](example/lib/ui/example/otherwidget/refresh_recordable_listview_example.dart)。
 
+## 为什么刷新或加载一直不结束？
 
-6. <h3>关于改变回弹动画的问题,SpringDecription里三个变量值是什么关系?怎么利用这三个值达到我要的回弹效果?</h3>
-这个问题建议你去查flutter里的api,需要明白一定的物理和数学知识。事实上,我也不知道怎么算
+onRefresh/onLoading 是触发回调，组件不会等待业务 Future 来结束状态。请求完成后须调用 refreshCompleted/refreshFailed 或 loadComplete/loadFailed/loadNoData。异常路径也要结束状态；返回页面后先检查 mounted。
 
-7. <h3>在Android下,footer使用ShowAlways,我不想让它回弹怎么办?</h3>
-RefreshConfiguration配置属性maxUnderScrollExtent,自己判断平台然后,0.0代表不回弹
+## 如何在刷新后恢复加载？
 
-8. <h3>我想在距离屏幕一半就开始加载数据,怎么设置?</h3>
-RefreshConfiguration配置属性footerTriggerDistance,屏幕一半你可以借助MediaContent或者LayoutBuilder来计算屏幕高度
+调用 refreshCompleted(resetFooterState: true)，或在 footer 为 noMore 时调用 resetNoData()。默认 enableLoadingWhenNoData 为 false。点击失败提示重试需要配置 footer.onClick 并调用 requestLoading()。
 
-9. <h3>IOS状态栏双击为什么ListView不自动滚动到顶部?</h3>
-第一种可能,就是你把给予了ScrollController给child,所以不是Scaffold里的PrimaryScrollController,所以不跳转
-第二种可能,就是你外部的Scaffold不是你最顶层的Scaffold
+## 短列表如何隐藏或调整 footer？
 
-10. <h3>为什么使用CuperNavigationBar后(不只这一个情况),上面好像被遮住了一部分</h3>
-因为我内部就是采用CustomScrollView来实现的,而CustomScrollView它不像BoxScrollView会帮你注入padding,所以需要你自己注入padding或者使用SafeArea
+hideFooterWhenNotFull: true 隐藏短列表 footer 并禁用手势加载，noMore 状态仍可显示。保持 false 时，默认 noMore 跟随内容，其他状态在视口末端；shouldFooterFollowWhenNotFull 可修改。复杂 sliver 可使用 [手动判断](example/lib/ui/example/useStage/hidefooter_bycontent.dart)；需要撑满一屏参考 [填充示例](example/lib/ui/example/useStage/force_full_one_page.dart)。
 
-11. <h3>兼容性方面?</h3>
-自1.3.0换了一套新的方法去实现指示器，内部指示器实现是通过监听scrollController位置变化来实现的，并没有使用到类如NotificationListener和GestureDector这类可能引起滑动手势冲突的方法，
-所以应该可以兼容大多需要利用到手势之间的库。但是，可能不兼容一些库需要改写ScrollPhysics，内部的FrontStyle就很明显需要用到这个。
+## 拖到最大距离仍不触发，或希望提前加载？
 
-12. <h3>我有这样一个需求:当footer为没有更多数据的状态时,我想让它追随内容的尾部,其他状态就一直居于底部,是否可以实现?</h3>
-参见RefreshConfiguration里的shouldFooterFollowWhenNotFull，可完美解决。
+headerTriggerDistance 是下拉越界距离。footerTriggerDistance 判断 maxScrollExtent - pixels；正数可提前加载，负数要求底部越界。检查 maxOverScrollExtent/maxUnderScrollExtent 是否允许到达阈值，并考虑指示器占位补偿。不是所有物理配置都只由平台决定，见 [默认值](propertys.md#refreshconfiguration)。
 
-13. <h3>为什么不兼容SingleChildView?</h3>
-因为SingleChildView它内部采用的Viewport是SingleChild,而其他Viewport基本都是MultipleChild,所以我内部是没办法取它的Viewport里的sliver,取了也
-不能添加header和footer,直接把child存放在SmartRefresher child里即可,child为非ScrollView,作用等同于SingleChildScrollView
+## 如何控制弹性与惯性加载？
 
-14.为什么拖到最大的距离不能触发刷新?为什么加载更多不触发?
-这类问题一般发生在Android系统，绝大数情况是因为maxOverScrollExtent和maxUnderScrollExtent限制了最大拖动的高度问题,你需要确保它要大于triggerDistance,因为内部
-没有帮你自动识别判断
+通过 springDescription 调整 mass、stiffness、damping，通过 dragSpeedRatio 调整越界拖动比例。maxOverScrollExtent/maxUnderScrollExtent 限制拖动越界；topHitBoundary/bottomHitBoundary 限制惯性越界。enableBallisticLoad 默认 true；设为 false 可以要求先拖动到 canLoading 再松手加载。
 
-15.为什么引用库后,随着数据量大时越来越卡顿?
-这种情况绝大多数都是因为开启了shrinkWrap=true和设置physic:NeverScrollPhysics,ScrollView一定要作为SmartRefresher's child,不可分开。
+## 如何接入 PageView 或 SingleChildScrollView？
+
+不要直接嵌套同轴滚动组件。普通内容直接传给 SmartRefresher，布局需有合适约束。分页参考 [PageScrollPhysics + SliverFillViewport](example/lib/ui/example/otherwidget/refresh_pageView_example.dart)。横向子滚动组件需要有限高度；出现 unbounded height 时检查外层约束。
+
+## 如何实现 GIF 或复杂动画？
+
+使用 CustomHeader/CustomFooter 的位移和状态回调，或继承指示器 State。GIF 的 [示例](example/lib/ui/example/customindicator/gif_indicator_example1.dart) 使用 gif_view 切换帧段；随拖动变化可在 onOffsetChange 中调用 GifController.seek。更多见 [自定义指示器](custom_indicator.md)。
+
+## 为什么顶部被遮挡，或状态栏点击不回顶部？
+
+重建后的 CustomScrollView 不保留 BoxScrollView 自动系统 padding，使用 SafeArea 或显式 padding。设置自己的 ScrollController 后，滚动组件可能不再使用 Scaffold 的 PrimaryScrollController；检查 primary、控制器与 Scaffold 层级。
+
+## NestedScrollView 或其他自定义物理规则能否直接兼容？
+
+需要验证具体结构。刷新组件监听 ScrollPosition，并叠加 RefreshPhysics；特殊滚动组件的活动、边界和 Viewport 假设可能不同。参考 [注意事项](notice.md) 与 [NestedScrollView 示例](example/lib/ui/example/useStage/Nested.dart)。
+
+## needCallback: false 为什么仍触发回调？
+
+当前只有 needMove: true 分支处理 needCallback。needMove: false 仍通知状态监听器并触发业务回调，详见 [API](propertys.md#refreshcontroller)。

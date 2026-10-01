@@ -1,29 +1,39 @@
-# Notice
+# Integration and lifecycle notes
 
-## RefreshController
-* RefreshController not support new multiple times,please keep the same lifecircle with SmartRefresher
-* RefreshController can only correspond to one Smart Refresher. Don't try to assign RefreshController to multiple Smart Refreshers. The most common application scenarios are TabBarView and PageView.
+## Controllers
 
-## SmartRefresher
-* Don't put the ScrollView component you want to add an indicator under a component's subtree. Because of the implementation mechanism, it's not implemented with components like NotificationListener.
-* When you want to turn off drop-down and pull-up functions, you can use enablePullUp and enablePullDown attributes
-* When child does not inherit ScrollView, note that box constraints are unbounded in height under Smart Refresher
-* not support SingleChildView,put it into SmartRefresher's child instead.
-* When you want to add background to ScrollView, remember not to wrap Container for ListView or GridView at the child node, wrap Container outside Smart Refresher
+- Create RefreshController in State, keep its lifetime aligned with SmartRefresher, and do not recreate it in build or share it between refreshers.
+- Dispose it in State.dispose. Unmounting SmartRefresher detaches position listeners but does not dispose the controller's notifiers.
+- Check mounted after asynchronous work before updating data and controller status. The component does not await onRefresh/onLoading Futures or handle business exceptions for you.
+- position becomes available after an indicator mounts. Request operations after the first frame, or use initialRefresh: true. An operation cannot start its interaction without the matching indicator.
+- See [API](propertys_en.md#refreshcontroller) for needCallback and Future return limitations.
 
+## Scroll structure
 
-## Behind RefreshStyle
-* In fact, the realization of this style is realized by the dynamic change of height. Try to use Align attributes more in the periphery, and there will be different sliding effects.
-* It has been found that this style does not support Icon as a widget, i.e. Classial Header. It does not support Icon. Using this indicator,
-you will find that Icon will be suspended in the attempt area for reasons I have not found out yet.
+Pass ListView, GridView or CustomScrollView directly as child. Put backgrounds, Scrollbar, NotificationListener and ScrollConfiguration outside SmartRefresher. Ordinary content uses SliverRefreshBody; do not wrap it in SingleChildScrollView. See [README](README.md#child).
 
-## footer indicator
-* For the problem of not satisfying one page hiding, although the internal use of precedingScrollExtent to determine how many distances ahead, but this method is not advisable, there is a case that a sliver only occupies scrollExtent but not scrollExtent.
-  The case of layoutExtent. So if your internal slivers have this kind of sliver, my internal judgment is not legitimate, you need to judge manually. Set hideWhenNotFull to false, and then use Boolean values to determine.
+header/footer can be compositions but must ultimately build slivers, not ordinary Containers. The builder constructor requires you to insert indicators and apply RefreshPhysics. A direct Scrollable must return a Viewport from viewportBuilder, not a single-child or shrink-wrapping viewport.
 
-## NestedScrollView(Not advice to use unless necessary)
-* ScrollController need to be placed in NestedScrollView,there is not work just placed in "child"。
+Rebuilding a ScrollView inherits selected properties rather than copying everything; shrinkWrap is not forwarded. Automatic BoxScrollView system padding is not retained; use explicit padding or SafeArea.
 
-## CustomScrollView
-* For UnFollow refresh style, when you slivers first element with Sliver Appbar, Sliver Rheader, there will be a very strange phenomenon, do not know how to describe, that is,
- the location of Sliver AppBar will change with the position of the indicator. In this case, you can try adding SliverToBox Adapter to the first element of slivers.
+## Short lists and footers
+
+hideFooterWhenNotFull defaults to false. With true, short content hides the footer and disables gesture loading; noMore can remain visible. By default noMore follows content, while other states sit at the viewport end; override shouldFooterFollowWhenNotFull as needed.
+
+The implementation compares precedingScrollExtent against viewport extent after subtracting the refresh header's scrollExtent. Complex slivers may have different scroll and layout extents. If needed, turn off automatic hiding and calculate enablePullUp yourself; see [manual hiding](example/lib/ui/example/useStage/hidefooter_bycontent.dart) and [filling free space](example/lib/ui/example/useStage/force_full_one_page.dart).
+
+LoadStyle controls layout space: ShowAlways retains it, HideAlways does not, and ShowWhenLoading retains it while loading. These are not direct painting switches; short-list footer scrollExtent has additional handling. Tapping calls onClick only; call requestLoading() yourself to retry.
+
+## Special cases
+
+- Validate NestedScrollView nesting, explicit requests and quick direction changes; see the [example](example/lib/ui/example/useStage/Nested.dart).
+- Validate SliverAppBar/persistent-header positioning with UnFollow. The [basic example](example/lib/ui/example/useStage/basic.dart) puts a SliverToBoxAdapter before content.
+- The [DraggableScrollableSheet example](example/lib/ui/example/otherwidget/draggable_bottomsheet_loadmore.dart) enables loading only and uses the sheet's ScrollController.
+- Two-level layout currently uses viewport height. Do not assume horizontal behavior matches vertical behavior. The direct Scrollable path does not insert a header when only enableTwoLevel is enabled.
+- Dispose custom AnimationControllers yourself. LinkHeader/LinkFooter require a mounted GlobalKey whose external State implements RefreshProcessor/LoadingProcessor respectively.
+
+## Current implementation limits
+
+Some configuration changes do not notify the subtree automatically; see [configuration](propertys_en.md#refreshconfiguration). CustomHeader's onResetValue is currently not called. Override resetValue in RefreshIndicatorState or use onModeChange to reset animations; see [custom indicators](custom_indicator_en.md).
+
+These notes describe the current source; they do not imply these limits have been fixed.

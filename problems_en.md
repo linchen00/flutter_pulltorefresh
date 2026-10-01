@@ -1,51 +1,49 @@
-1.  <h3>How to monitor the location change of ScrollView? it mean I need to use ScrollController.addListener?</h3>
-set controller to the child(ScrollView) attribute 
+# FAQ
 
-2.  <h3>What is the purpose of position and scroll Contorller exposed in RefreshController?</h3>
-First of all, scrollController is a pre-existing api. When it was changed later, it was found that scrollController had a share problem, so it was abandoned and was not intended to be deleted.
-Maybe some people quote it, deleting it will cause some people having problems. The main reason for exposing these two things is that in some cases, addListener is not needed, but only needed.
-Control the jump. For example, when I implement a chat list, I just need to control ScrollView to scroll to the bottom, but I don't need to monitor its location.
+## How do I listen to or control scrolling?
 
-3.  <h3>throw error,with a hit text"Horizontal viewport was given unbounded height.",How to solve?</h3>
-If you have this error message, it's usually because there's no limit on the height of the child. For example, PageView, you can't put it in the child directly. You need to give PageView a limit on the height.
+Pass your ScrollController to the direct ScrollView child or SmartRefresher.scrollController. RefreshController.position can drive scrolling after an indicator mounts; RefreshController.scrollController was removed.
 
-4.  <h3>I have a need to disable pull-up loading when I don't have a screen, but I don't know how to calculate the height in ScrollView. Each item has a different height. How to solve it?</h3>
-In RefreshConfiguration, there is an attribute hideFooterWhenNotFull, which in most cases can help you calculate and determine whether or not to hide.
+## Why are header/footer missing?
 
-5.  <h3>Does the indicator support custom frame animation? For example, I want to change the GIF schedule with drag-and-drop, reach a certain state and start cycling.</h3>
-Yes. Use [gif_view](https://pub.dev/packages/gif_view) to seek to a GIF frame and control playback. The [example](example/lib/ui/example/customindicator/gif_indicator_example1.dart) plays different frame ranges when refresh or loading starts and ends. To tie the frame to the drag distance, call `GifController.seek` from `onOffsetChange`.
+Check enablePullDown/enablePullUp, then ensure ListView is the direct child. Wrapping it in Container, Scrollbar or a custom widget creates nested scrolling. Use [SliverAnimatedList](example/lib/ui/example/otherwidget/refresh_animatedlist_example.dart) for animations and the [adapter example](example/lib/ui/example/otherwidget/refresh_recordable_listview_example.dart) for reordering.
 
-6.  <h3>What is the relationship between the values of three variables in Spring Decription and how to use these values to achieve the rebound effect I want?</h3>
-This question suggests that you look up the API in flutter, and you need to understand a certain amount of physics and mathematics. Actually, I don't know how to calculate it.
+## Why does refreshing/loading never end?
 
-7.  <h3>Under Android, footer uses ShowAlways style. What if I don't want it to bounce back?</h3>
-RefreshConfiguration have a contribute maxUnderScrollExtent,0.0 indicate no rebound
+onRefresh/onLoading trigger your work; the component does not await its Future to finish status. Call refreshCompleted/refreshFailed or loadComplete/loadFailed/loadNoData, including on error paths. Check mounted after asynchronous work.
 
-8.  <h3>I want to start loading data half way from the screen. How do I set it up?</h3>
-RefreshConfigurationhave a contribute footerTriggerDistance,you can use MediaContent or LayoutBuilder compute screen height
+## How do I restore loading after refresh?
 
-9. <h3>IOS Status Bar Double-click Why ListView does not automatically scroll to the top?</h3>
-the one,You give ScrollController to the child, so it's not PrimaryScrollController in Scaffold, so it doesn't jump.
-The second possibility is that your external Scaffold is not your ancestry Scaffold.
+Call refreshCompleted(resetFooterState: true), or resetNoData() when the footer is noMore. enableLoadingWhenNoData defaults to false. For tap-to-retry, configure footer.onClick to call requestLoading().
 
-10. <h3>Why is it that after using Cuper Navigation Bar (and not just this case), part of the list header is obscured?</h3>
-Because I use CustomScrollView internally, and CustomScrollView doesn't inject padding like BoxScrollView does, so you need to inject padding or SafeArea yourself.
+## How do I hide or position a short-list footer?
 
-11. <h3>Compatiable?</h3>
-1.3.0 replaces a new method to implement the indicator. The internal indicator is implemented by monitoring scroll Controller position changes. There are no methods such as NotificationListener and GestureDector that may cause sliding gesture conflicts.
-So it should be compatible with most of the libraries that need to be used between gestures. However, some libraries may not be compatible and ScrollPhysics needs to be rewritten, which is clearly required for internal FrontStyle.
+hideFooterWhenNotFull: true hides the footer and disables gesture loading for short content; noMore can remain visible. With false, noMore follows content by default and other states sit at the viewport end; override shouldFooterFollowWhenNotFull. For complex slivers, see [manual hiding](example/lib/ui/example/useStage/hidefooter_bycontent.dart); to fill a viewport, see [this example](example/lib/ui/example/useStage/force_full_one_page.dart).
 
-12.  <h3>I have a requirement that when footer is in a state where there is no more data, I want it to follow the end of the content and the other states remain at the bottom. Is that possible?</h3>
-RefreshConfiguration's shouldFooterFollowWhenNotFull can solve
+## Why cannot I reach the trigger, or how do I load earlier?
 
-13.  <h3>Why not compatible with SingleChildView?</h3>
-Because SingleChildView uses SingleChild as its internal Viewport, while other Viewports are basically MultipleChild, so I can't get sliver from its Viewport internally.
-You can't add header and footer. just put it into SmartRefresher's child instead.
+headerTriggerDistance measures leading overscroll. footerTriggerDistance compares maxScrollExtent - pixels: positive values load early, negative values require bottom overscroll. Ensure maxOverScrollExtent/maxUnderScrollExtent allow the threshold, accounting for indicator layout compensation. Defaults depend on physics, not just platform; see [configuration](propertys_en.md#refreshconfiguration).
 
-14. Why can't dragging to the maximum distance trigger refresh? Why load more without triggering?
-This kind of problem usually occurs on Android systems, mostly because maxOverScrollExtent and maxUnderScrollExtent limit the height of the maximum drag. You need to make sure that it is larger than triggerDistance because it's internal.
-Not automatically identifying and judging for you
+## How do I change springs or ballistic loading?
 
-15.Why performance become more and more slow with the large amount of data?
-this situation is mostly because the setting shrinkWrap=true and physic:NeverScrollPhysics,ScrollView must be as SmartRefresher's child。
+springDescription controls mass, stiffness and damping; dragSpeedRatio scales overscroll dragging. maxOverScrollExtent/maxUnderScrollExtent constrain dragging, and topHitBoundary/bottomHitBoundary constrain ballistic overscroll. enableBallisticLoad defaults to true; false requires dragging to canLoading before release.
 
+## How do I integrate PageView or SingleChildScrollView?
+
+Avoid directly nesting same-axis scrollables. Pass ordinary content to SmartRefresher with appropriate constraints. For paging, see [PageScrollPhysics + SliverFillViewport](example/lib/ui/example/otherwidget/refresh_pageView_example.dart). Horizontal child scrollables need finite height; inspect parent constraints for unbounded-height errors.
+
+## How do I implement GIFs or complex animations?
+
+Use CustomHeader/CustomFooter offset and mode callbacks, or subclass indicator State. The [GIF example](example/lib/ui/example/customindicator/gif_indicator_example1.dart) uses gif_view for frame ranges; call GifController.seek in onOffsetChange to follow dragging. See [custom indicators](custom_indicator_en.md).
+
+## Why is content obscured, or why does tapping the status bar not scroll to the top?
+
+The rebuilt CustomScrollView does not retain automatic BoxScrollView system padding; use SafeArea or explicit padding. A custom ScrollController can bypass Scaffold's PrimaryScrollController; inspect primary, controllers and Scaffold hierarchy.
+
+## Does NestedScrollView or custom physics work automatically?
+
+Validate your structure. The library listens to ScrollPosition and applies RefreshPhysics; special scrollables may have different activity, boundary and Viewport assumptions. See [notes](notice_en.md) and the [NestedScrollView example](example/lib/ui/example/useStage/Nested.dart).
+
+## Why does needCallback: false still call my callback?
+
+Currently only the needMove: true branch handles needCallback. With needMove: false, status listeners and business callbacks still run; see [API](propertys_en.md#refreshcontroller).
