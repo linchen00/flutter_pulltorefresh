@@ -10,11 +10,11 @@
 
 ## 为什么刷新或加载一直不结束？
 
-onRefresh/onLoading 是触发回调，组件不会等待业务 Future 来结束状态。请求完成后须调用 refreshCompleted/refreshFailed 或 loadComplete/loadFailed/loadNoData。异常路径也要结束状态；返回页面后先检查 mounted。
+onRefresh/onLoading 是触发回调，组件不会等待业务 Future 来结束状态。请求完成后须调用 RefreshState.refreshCompleted/refreshFailed 或 RefreshState.loadComplete/loadFailed/loadNoData。异常路径也要结束状态；返回页面后先检查 mounted。
 
 ## 如何在刷新后恢复加载？
 
-调用 refreshCompleted(resetFooterState: true)，或在 footer 为 noMore 时调用 resetNoData()。默认 enableLoadingWhenNoData 为 false。点击失败提示重试需要配置 footer.onClick 并调用 requestLoading()。
+调用 state.refreshCompleted(resetFooterState: true)，或在 footer 为 noMore 时调用 state.resetNoData()。默认 enableLoadingWhenNoData 为 false。点击失败提示重试需要配置 footer.onClick 并调用 requestLoading()。
 
 ## 短列表如何隐藏或调整 footer？
 
@@ -44,6 +44,6 @@ headerTriggerDistance 是下拉越界距离。footerTriggerDistance 判断 maxSc
 
 需要验证具体结构。刷新组件监听 ScrollPosition，并叠加 RefreshPhysics；特殊滚动组件的活动、边界和 Viewport 假设可能不同。参考 [注意事项](notice.md) 与 [NestedScrollView 示例](example/lib/ui/example/useStage/Nested.dart)。
 
-## needCallback: false 为什么仍触发回调？
+## 状态更新和业务回调有什么区别？
 
-当前只有 needMove: true 分支处理 needCallback。needMove: false 仍通知状态监听器并触发业务回调，详见 [API](propertys.md#refreshcontroller)。
+state.startRefresh/startLoading 和直接修改 notifier.value 只更新指示器，不触发 onRefresh/onLoading。手势和控制器请求才触发业务回调。两个 needMove 分支下，needCallback: false 都会关闭业务回调，同时保留状态通知和指示器钩子，见 [API](propertys.md#refreshcontroller)。

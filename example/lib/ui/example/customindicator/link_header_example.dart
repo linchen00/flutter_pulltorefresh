@@ -23,6 +23,7 @@ class LinkHeaderExample extends StatefulWidget {
 }
 
 class _LinkHeaderExampleState extends State<LinkHeaderExample> {
+  RefreshState _refreshState = RefreshState();
   RefreshController _refreshController = RefreshController();
   final Key linkKey = GlobalKey();
   List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
@@ -44,6 +45,7 @@ class _LinkHeaderExampleState extends State<LinkHeaderExample> {
   @override
   void dispose() {
     _refreshController.dispose();
+    _refreshState.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -63,6 +65,7 @@ class _LinkHeaderExampleState extends State<LinkHeaderExample> {
                   left: 0.0,
                   right: 0.0,
                   child: SmartRefresher(
+                    state: _refreshState,
                     controller: _refreshController,
                     header: LinkHeader(linkKey: linkKey),
                     onRefresh: () async {
@@ -71,8 +74,7 @@ class _LinkHeaderExampleState extends State<LinkHeaderExample> {
                       setState(() {
                         data = List.generate(9, (index) => "${index + 1}");
                       });
-                      _refreshController.refreshCompleted(
-                          resetFooterState: true);
+                      _refreshState.refreshCompleted(resetFooterState: true);
                     },
                     child: CustomScrollView(
                       controller: _scrollController,

@@ -22,8 +22,8 @@ class TapButtonRefreshExample extends StatefulWidget {
 
 class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
   List<String> data = [];
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
   bool _enablePullDown = false;
 
   Widget buildEmpty() {
@@ -48,8 +48,8 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
   @override
   void initState() {
     super.initState();
-    _refreshController.headerMode!.addListener(() {
-      if (_refreshController.headerMode!.value == RefreshStatus.idle) {
+    _refreshState.headerMode!.addListener(() {
+      if (_refreshState.headerMode!.value == RefreshStatus.idle) {
         Future.delayed(const Duration(milliseconds: 20)).then((value) {
           _enablePullDown = false;
           setState(() {});
@@ -62,6 +62,7 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SmartRefresher(
+        state: _refreshState,
         controller: _refreshController,
         enablePullUp: data.length != 0,
         enablePullDown: _enablePullDown,
@@ -72,7 +73,7 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
           setState(() {
             data = List.generate(6, (index) => "Item ${index + 1}");
           });
-          _refreshController.refreshCompleted(resetFooterState: true);
+          _refreshState.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(const Duration(milliseconds: 1000));
@@ -82,7 +83,7 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
               data.add("Item ${data.length + 1}");
             }
           });
-          _refreshController.loadComplete();
+          _refreshState.loadComplete();
         },
         child: data.length == 0
             ? buildEmpty()
@@ -108,5 +109,12 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }

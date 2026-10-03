@@ -79,6 +79,7 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
       });
   }
 
+  RefreshState _refreshState = RefreshState();
   RefreshController _refreshController = RefreshController();
 
   @override
@@ -120,7 +121,7 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
             _list.insert(i, _nextItem!);
             _nextItem = _nextItem! + 1;
           }
-          _refreshController.refreshCompleted(resetFooterState: true);
+          _refreshState.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 500));
@@ -129,12 +130,20 @@ class _AnimatedListExampleState extends State<AnimatedListExample> {
             _list.insert(_list.length, _nextItem!);
             _nextItem = _nextItem! + 1;
           }
-          _refreshController.loadComplete();
+          _refreshState.loadComplete();
         },
         enablePullUp: true,
+        state: _refreshState,
         controller: _refreshController,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }
 

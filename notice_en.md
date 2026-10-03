@@ -1,12 +1,13 @@
 # Integration and lifecycle notes
 
-## Controllers
+## State and controller lifecycle
 
-- Create RefreshController in State, keep its lifetime aligned with SmartRefresher, and do not recreate it in build or share it between refreshers.
-- Dispose it in State.dispose. Unmounting SmartRefresher detaches position listeners but does not dispose the controller's notifiers.
-- Check mounted after asynchronous work before updating data and controller status. The component does not await onRefresh/onLoading Futures or handle business exceptions for you.
-- position becomes available after an indicator mounts. Request operations after the first frame, or use initialRefresh: true. An operation cannot start its interaction without the matching indicator.
-- See [API](propertys_en.md#refreshcontroller) for needCallback and Future return limitations.
+- Create RefreshState and an optional RefreshController outside build. Each can bind one SmartRefresher at a time.
+- The caller disposes both objects. Unmounting removes UI listeners and bindings without disposing either object; state can outlive the UI and be mounted again.
+- Check mounted after asynchronous UI work before updating data. Complete or fail status through RefreshState; the component does not await business callback Futures or handle their exceptions.
+- startRefresh/startLoading and direct state assignments only update state and indicators. Use controller requests to invoke business callbacks or scrolling.
+- position is available after an indicator mounts and becomes null after detachment. Request operations after layout, or use SmartRefresher(initialRefresh: true).
+- All controller operations return Future<void>. needCallback: false preserves status notifications in both needMove branches; see [API](propertys_en.md#refreshcontroller).
 
 ## Scroll structure
 

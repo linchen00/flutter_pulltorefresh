@@ -26,14 +26,16 @@ class TwoLevelExample extends StatefulWidget {
 }
 
 class _TwoLevelExampleState extends State<TwoLevelExample> {
+  RefreshState _refreshState1 = RefreshState();
   RefreshController _refreshController1 = RefreshController();
+  RefreshState _refreshState2 = RefreshState();
   RefreshController _refreshController2 = RefreshController();
   int _tabIndex = 0;
   int _loadedItemCount = 0;
 
   @override
   void initState() {
-    _refreshController1.headerMode?.addListener(() {
+    _refreshState1.headerMode?.addListener(() {
       setState(() {});
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,7 +52,7 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
       enableScrollWhenTwoLevel: true,
       maxOverScrollExtent: 120,
       child: Scaffold(
-        bottomNavigationBar: !_refreshController1.isTwoLevel
+        bottomNavigationBar: !_refreshState1.isTwoLevel
             ? BottomNavigationBar(
                 currentIndex: _tabIndex,
                 onTap: (index) {
@@ -114,6 +116,7 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
                         )
                       ],
                     ),
+                    state: _refreshState1,
                     controller: _refreshController1,
                     enableTwoLevel: true,
                     enablePullDown: true,
@@ -122,14 +125,13 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
                       await Future.delayed(Duration(milliseconds: 2000));
                       if (!mounted) return;
                       setState(() => _loadedItemCount += 10);
-                      _refreshController1.loadComplete();
+                      _refreshState1.loadComplete();
                     },
                     onRefresh: () async {
                       await Future.delayed(Duration(milliseconds: 2000));
                       if (!mounted) return;
                       setState(() => _loadedItemCount = 0);
-                      _refreshController1.refreshCompleted(
-                          resetFooterState: true);
+                      _refreshState1.refreshCompleted(resetFooterState: true);
                     },
                     onTwoLevel: (bool isOpen) {
                       print("twoLevel opening:" + isOpen.toString());
@@ -159,11 +161,12 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
                     )
                   ],
                 ),
+                state: _refreshState2,
                 controller: _refreshController2,
                 enableTwoLevel: true,
                 onRefresh: () async {
                   await Future.delayed(Duration(milliseconds: 2000));
-                  _refreshController2.refreshCompleted();
+                  _refreshState2.refreshCompleted();
                 },
                 onTwoLevel: (bool isOpen) {
                   if (isOpen) {
@@ -187,6 +190,15 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState1.dispose();
+    _refreshController1.dispose();
+    _refreshState2.dispose();
+    _refreshController2.dispose();
+    super.dispose();
   }
 }
 
@@ -224,7 +236,7 @@ class TwoLevelWidget extends StatelessWidget {
                 color: Colors.white,
               ),
               onTap: () {
-                SmartRefresher.of(context)?.controller.twoLevelComplete();
+                SmartRefresher.ofState(context)?.twoLevelComplete();
               },
             ),
             alignment: Alignment.bottomLeft,

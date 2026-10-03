@@ -124,8 +124,8 @@ class OnlyListView extends StatefulWidget {
 }
 
 class _OnlyListViewState extends State<OnlyListView> {
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
   List<String> data = List.generate(9, (index) => "Item ${index + 1}");
   GlobalKey _contentKey = GlobalKey();
   GlobalKey _refresherKey = GlobalKey();
@@ -152,6 +152,7 @@ class _OnlyListViewState extends State<OnlyListView> {
   Widget build(BuildContext context) {
     return SmartRefresher(
       key: _refresherKey,
+      state: _refreshState,
       controller: _refreshController,
       enablePullUp: true,
       child: buildCtn(),
@@ -166,7 +167,7 @@ class _OnlyListViewState extends State<OnlyListView> {
         setState(() {
           data = List.generate(9, (index) => "Item ${index + 1}");
         });
-        _refreshController.refreshCompleted(resetFooterState: true);
+        _refreshState.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         print("onLoading");
@@ -177,9 +178,16 @@ class _OnlyListViewState extends State<OnlyListView> {
             data.add("Item ${data.length + 1}");
           }
         });
-        _refreshController.loadComplete();
+        _refreshState.loadComplete();
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }
 
@@ -192,8 +200,8 @@ class OnlyGridView extends StatefulWidget {
 }
 
 class _OnlyGridViewState extends State<OnlyGridView> {
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
   List<String> data = List.generate(9, (index) => "Item ${index + 1}");
 
   Widget buildCtn() {
@@ -211,6 +219,7 @@ class _OnlyGridViewState extends State<OnlyGridView> {
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _refreshController,
       enablePullUp: true,
       child: buildCtn(),
@@ -221,7 +230,7 @@ class _OnlyGridViewState extends State<OnlyGridView> {
         setState(() {
           data = List.generate(9, (index) => "Item ${index + 1}");
         });
-        _refreshController.refreshCompleted(resetFooterState: true);
+        _refreshState.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
@@ -231,9 +240,16 @@ class _OnlyGridViewState extends State<OnlyGridView> {
             data.add("Item ${data.length + 1}");
           }
         });
-        _refreshController.loadComplete();
+        _refreshState.loadComplete();
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }
 
@@ -248,8 +264,8 @@ class NoScrollable extends StatefulWidget {
 }
 
 class _NoScrollableState extends State<NoScrollable> {
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
   List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
   Widget buildCtn() {
@@ -284,6 +300,7 @@ class _NoScrollableState extends State<NoScrollable> {
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _refreshController,
       enablePullUp: true,
       child: buildCtn(),
@@ -295,7 +312,7 @@ class _NoScrollableState extends State<NoScrollable> {
         setState(() {
           data = List.generate(10, (index) => "Item ${index + 1}");
         });
-        _refreshController.refreshCompleted(resetFooterState: true);
+        _refreshState.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
@@ -305,9 +322,16 @@ class _NoScrollableState extends State<NoScrollable> {
             data.add("Item ${data.length + 1}");
           }
         });
-        _refreshController.loadComplete();
+        _refreshState.loadComplete();
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }
 
@@ -320,8 +344,8 @@ class SliverAppBarWithList extends StatefulWidget {
 }
 
 class _SliverAppBarWithListState extends State<SliverAppBarWithList> {
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
   List<String> data = List.generate(9, (index) => "Item ${index + 1}");
 
   Widget buildCtn() {
@@ -345,6 +369,7 @@ class _SliverAppBarWithListState extends State<SliverAppBarWithList> {
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _refreshController,
       enablePullUp: true,
       child: buildCtn(),
@@ -355,7 +380,7 @@ class _SliverAppBarWithListState extends State<SliverAppBarWithList> {
         setState(() {
           data = List.generate(9, (index) => "Item ${index + 1}");
         });
-        _refreshController.refreshCompleted(resetFooterState: true);
+        _refreshState.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
@@ -365,9 +390,16 @@ class _SliverAppBarWithListState extends State<SliverAppBarWithList> {
             data.add("Item ${data.length + 1}");
           }
         });
-        _refreshController.loadComplete();
+        _refreshState.loadComplete();
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }
 
@@ -380,8 +412,8 @@ class GridAndList extends StatefulWidget {
 }
 
 class _GridAndListState extends State<GridAndList> {
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
   List<String> data = List.generate(9, (index) => "Item ${index + 1}");
 
   Widget buildCtn() {
@@ -411,6 +443,7 @@ class _GridAndListState extends State<GridAndList> {
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _refreshController,
       enablePullUp: true,
       child: buildCtn(),
@@ -421,7 +454,7 @@ class _GridAndListState extends State<GridAndList> {
         setState(() {
           data = List.generate(9, (index) => "Item ${index + 1}");
         });
-        _refreshController.refreshCompleted(resetFooterState: true);
+        _refreshState.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
@@ -431,9 +464,16 @@ class _GridAndListState extends State<GridAndList> {
             data.add("Item ${data.length + 1}");
           }
         });
-        _refreshController.loadComplete();
+        _refreshState.loadComplete();
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }
 
@@ -446,8 +486,8 @@ class SwiperAndList extends StatefulWidget {
 }
 
 class _SwiperAndListState extends State<SwiperAndList> {
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
   List<String> data = List.generate(9, (index) => "Item ${index + 1}");
 
   Widget buildCtn() {
@@ -483,6 +523,7 @@ class _SwiperAndListState extends State<SwiperAndList> {
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _refreshController,
       enablePullUp: true,
       child: buildCtn(),
@@ -494,7 +535,7 @@ class _SwiperAndListState extends State<SwiperAndList> {
         setState(() {
           data = List.generate(9, (index) => "Item ${index + 1}");
         });
-        _refreshController.refreshCompleted(resetFooterState: true);
+        _refreshState.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(Duration(milliseconds: 1000));
@@ -505,8 +546,15 @@ class _SwiperAndListState extends State<SwiperAndList> {
             data.add("Item ${data.length + 1}");
           }
         });
-        _refreshController.loadComplete();
+        _refreshState.loadComplete();
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }

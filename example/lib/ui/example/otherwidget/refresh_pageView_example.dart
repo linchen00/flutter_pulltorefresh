@@ -22,6 +22,7 @@ class PageViewExample extends StatefulWidget {
 class PageViewExampleState extends State<PageViewExample>
     with TickerProviderStateMixin {
   late RefreshController _refreshController;
+  late RefreshState _refreshState;
   int _lastReportedPage = 0;
   int _pageCount = 4;
 
@@ -33,13 +34,15 @@ class PageViewExampleState extends State<PageViewExample>
 
   @override
   void initState() {
-    _refreshController = RefreshController(initialRefresh: true);
+    _refreshState = RefreshState();
+    _refreshController = RefreshController();
     super.initState();
   }
 
   @override
   void dispose() {
     _refreshController.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 
@@ -67,6 +70,8 @@ class PageViewExampleState extends State<PageViewExample>
           footer: ClassicFooter(
             loadStyle: LoadStyle.ShowWhenLoading,
           ),
+          state: _refreshState,
+          initialRefresh: true,
           controller: _refreshController,
           header: MaterialClassicHeader(),
           onRefresh: () async {
@@ -78,7 +83,7 @@ class PageViewExampleState extends State<PageViewExample>
               _lastReportedPage = 0;
             });
             _pageController.jumpToPage(0);
-            _refreshController.refreshCompleted(resetFooterState: true);
+            _refreshState.refreshCompleted(resetFooterState: true);
           },
           child: CustomScrollView(
             physics: PageScrollPhysics(),
@@ -97,7 +102,7 @@ class PageViewExampleState extends State<PageViewExample>
             Future.delayed(const Duration(milliseconds: 2000)).then((val) {
               if (!mounted) return;
               setState(() => _pageCount += 1);
-              _refreshController.loadComplete();
+              _refreshState.loadComplete();
             });
           },
         ),

@@ -16,8 +16,9 @@ Future<void>? buildNotFullList(tester, bool reverse, Axis direction,
     {dynamic footer = const TestFooter(),
     dynamic header = const TestHeader(),
     bool initload = false}) {
-  final RefreshController _refreshController = RefreshController(
+  final RefreshState _refreshState = RefreshState(
       initialLoadStatus: initload ? LoadStatus.loading : LoadStatus.idle);
+  final RefreshController _refreshController = RefreshController();
   return tester.pumpWidget(MaterialApp(
     home: Container(
       height: 600,
@@ -36,6 +37,7 @@ Future<void>? buildNotFullList(tester, bool reverse, Axis direction,
           itemCount: 1,
           itemExtent: 100,
         ),
+        state: _refreshState,
         controller: _refreshController,
       ),
     ),
@@ -158,6 +160,7 @@ void main() {
   testWidgets("header or footer hittest test,make sure onClick can callback",
       (tester) async {
     int time = 0;
+    RefreshState _refreshState = RefreshState();
     RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(RefreshConfiguration(
       child: MaterialApp(
@@ -180,6 +183,7 @@ void main() {
               itemCount: 1,
               itemExtent: 100,
             ),
+            state: _refreshState,
             controller: _refreshController,
           ),
         ),
@@ -207,6 +211,7 @@ void main() {
     expect(time, 6);
 
     time = 0;
+    _refreshState = RefreshState();
     _refreshController = RefreshController();
     await tester.pumpWidget(RefreshConfiguration(
       child: MaterialApp(
@@ -235,6 +240,7 @@ void main() {
               itemCount: 1,
               itemExtent: 100,
             ),
+            state: _refreshState,
             controller: _refreshController,
           ),
         ),

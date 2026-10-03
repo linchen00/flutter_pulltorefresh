@@ -16,18 +16,20 @@ class RefreshExpansionPanelList extends StatefulWidget {
 
 class RefreshExpansionPanelListState extends State<RefreshExpansionPanelList> {
   List<Item> _data = generateItems(10);
+  RefreshState _state = RefreshState();
   RefreshController _controller = RefreshController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: SmartRefresher(
+        state: _state,
         controller: _controller,
         onRefresh: () async {
           await Future.delayed(const Duration(milliseconds: 600));
           if (!mounted) return;
           setState(() => _data = generateItems(10));
-          _controller.refreshCompleted(resetFooterState: true);
+          _state.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(const Duration(milliseconds: 600));
@@ -42,7 +44,7 @@ class RefreshExpansionPanelListState extends State<RefreshExpansionPanelList> {
               ),
             ));
           });
-          _controller.loadComplete();
+          _state.loadComplete();
         },
         child: ListView(
           shrinkWrap: true,
@@ -82,6 +84,13 @@ class RefreshExpansionPanelListState extends State<RefreshExpansionPanelList> {
         );
       }).toList(),
     );
+  }
+
+  @override
+  void dispose() {
+    _state.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 }
 

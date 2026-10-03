@@ -121,7 +121,7 @@ RefreshIndicatorState handles position listeners, the state machine and sliver w
 
 For a footer, extend LoadIndicator and LoadIndicatorState and override readyToLoad/endLoading as needed. The corresponding CustomFooter constructor parameter is named readyLoading, not readyToLoad. Tapping invokes onClick only; request loading through the controller yourself.
 
-Dispose custom animation controllers. Explicit requestRefresh/requestLoading and gesture preparation are not identical; needCallback: false bypasses status notification. See [API](propertys_en.md#refreshcontroller).
+Dispose custom animation controllers. Explicit requestRefresh/requestLoading and gesture preparation are not identical. needCallback: false preserves status notifications and onModeChange hooks. Updating RefreshState also updates indicators without invoking business callbacks. See [API](propertys_en.md#refreshcontroller).
 
 ## Styles and composition
 

@@ -157,6 +157,7 @@ class GifIndicatorExample1 extends StatefulWidget {
 }
 
 class GifIndicatorExample1State extends State<GifIndicatorExample1> {
+  RefreshState _state = RefreshState();
   RefreshController _controller = RefreshController();
   int _itemCount = 50;
   @override
@@ -166,6 +167,7 @@ class GifIndicatorExample1State extends State<GifIndicatorExample1> {
       enableBallisticLoad: false,
       footerTriggerDistance: -80,
       child: SmartRefresher(
+        state: _state,
         controller: _controller,
         enablePullUp: true,
         header: GifHeader1(),
@@ -174,13 +176,13 @@ class GifIndicatorExample1State extends State<GifIndicatorExample1> {
           await Future.delayed(Duration(milliseconds: 2000));
           if (!mounted) return;
           setState(() => _itemCount = 50);
-          _controller.refreshCompleted(resetFooterState: true);
+          _state.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 2000));
           if (!mounted) return;
           setState(() => _itemCount += 10);
-          _controller.loadComplete();
+          _state.loadComplete();
         },
         child: ListView.builder(
           itemBuilder: (c, q) => Card(),
@@ -189,5 +191,12 @@ class GifIndicatorExample1State extends State<GifIndicatorExample1> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _state.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 }

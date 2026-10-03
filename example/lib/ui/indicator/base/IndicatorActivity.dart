@@ -35,6 +35,7 @@ class IndicatorActivity extends StatefulWidget {
 class _IndicatorActivityState extends State<IndicatorActivity> {
   List<Widget> items = [];
   late RefreshController _refreshController;
+  late RefreshState _refreshState;
 
   void _init() {
     items.clear();
@@ -50,6 +51,7 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
   @override
   void initState() {
     _scrollController = new ScrollController();
+    _refreshState = RefreshState();
     _refreshController = RefreshController();
     _init();
 
@@ -59,6 +61,7 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
   @override
   void dispose() {
     _refreshController.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 
@@ -86,6 +89,7 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
               footer: widget.footer,
               enablePullDown: true,
               enablePullUp: true,
+              state: _refreshState,
               controller: _refreshController);
         },
       ),
@@ -97,7 +101,7 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
     Future.delayed(Duration(milliseconds: 1000)).then((_) {
       if (!mounted) return;
       setState(_init);
-      _refreshController.refreshCompleted(resetFooterState: true);
+      _refreshState.refreshCompleted(resetFooterState: true);
     });
   }
 
@@ -110,7 +114,7 @@ class _IndicatorActivityState extends State<IndicatorActivity> {
           items.add(Item(title: "Data ${items.length + 1}"));
         }
       });
-      _refreshController.loadComplete();
+      _refreshState.loadComplete();
     });
   }
 }

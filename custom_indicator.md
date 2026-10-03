@@ -121,7 +121,7 @@ RefreshIndicatorState 已负责位置监听、状态机与 sliver 包装。可�
 
 footer 继承 LoadIndicator 和 LoadIndicatorState，可重写 readyToLoad、endLoading 等方法。CustomFooter 对应的构造参数名称是 readyLoading，不是 readyToLoad。点击 footer 只触发 onClick，加载重试需自己调用控制器。
 
-动画控制器由自定义组件负责释放。主动 requestRefresh/requestLoading 与手势准备流程不完全相同，尤其 needCallback: false 会跳过状态通知，详见 [API](propertys.md#refreshcontroller)。
+动画控制器由自定义组件负责释放。主动 requestRefresh/requestLoading 与手势准备流程不完全相同；needCallback: false 保留状态通知与 onModeChange 钩子。更新 RefreshState 也会更新指示器，但不触发业务回调。详见 [API](propertys.md#refreshcontroller)。
 
 ## 样式与组合
 

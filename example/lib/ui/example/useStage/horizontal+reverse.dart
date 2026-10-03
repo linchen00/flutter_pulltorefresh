@@ -19,7 +19,9 @@ class HorizontalRefresh extends StatefulWidget {
 }
 
 class _HorizontalRefreshState extends State<HorizontalRefresh> {
+  RefreshState _state1 = RefreshState();
   RefreshController _controller1 = RefreshController();
+  RefreshState _state2 = RefreshState();
   RefreshController _controller2 = RefreshController();
   static const int _pageSize = 10;
   int _nextPage = 1;
@@ -52,9 +54,9 @@ class _HorizontalRefreshState extends State<HorizontalRefresh> {
     });
 
     if (refresh) {
-      _controller1.refreshCompleted(resetFooterState: true);
+      _state1.refreshCompleted(resetFooterState: true);
     } else if (loading) {
-      _controller1.loadComplete();
+      _state1.loadComplete();
     }
   }
 
@@ -80,7 +82,6 @@ class _HorizontalRefreshState extends State<HorizontalRefresh> {
   @override
   void initState() {
     super.initState();
-    _controller1 = RefreshController();
     _fetch();
   }
 
@@ -92,6 +93,7 @@ class _HorizontalRefreshState extends State<HorizontalRefresh> {
           child: SmartRefresher(
             enablePullDown: true,
             enablePullUp: true,
+            state: _state1,
             controller: _controller1,
             onRefresh: _onRefresh,
             footer: ClassicFooter(
@@ -131,6 +133,7 @@ class _HorizontalRefreshState extends State<HorizontalRefresh> {
             child: SmartRefresher(
               enablePullDown: true,
               enablePullUp: true,
+              state: _state2,
               controller: _controller2,
               onRefresh: () async {
                 await Future.delayed(const Duration(milliseconds: 1000));
@@ -139,7 +142,7 @@ class _HorizontalRefreshState extends State<HorizontalRefresh> {
                   reverseData =
                       List.generate(10, (index) => "data ${index + 1}");
                 });
-                _controller2.refreshCompleted(resetFooterState: true);
+                _state2.refreshCompleted(resetFooterState: true);
               },
               footer: ClassicFooter(
                 iconPos: IconPosition.top,
@@ -161,7 +164,7 @@ class _HorizontalRefreshState extends State<HorizontalRefresh> {
                     reverseData.add("data ${reverseData.length + 1}");
                   }
                 });
-                _controller2.loadComplete();
+                _state2.loadComplete();
               },
               child: ListView.builder(
                 reverse: true,
@@ -175,6 +178,15 @@ class _HorizontalRefreshState extends State<HorizontalRefresh> {
         )
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _state1.dispose();
+    _controller1.dispose();
+    _state2.dispose();
+    _controller2.dispose();
+    super.dispose();
   }
 }
 

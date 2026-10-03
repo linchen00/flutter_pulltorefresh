@@ -7,6 +7,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 void main() {
   testWidgets('starting and moving a reorder drag does not throw',
       (WidgetTester tester) async {
+    final refreshState = RefreshState();
     final RefreshController refreshController = RefreshController();
     final List<(int, int)> reorders = <(int, int)>[];
 
@@ -14,6 +15,7 @@ void main() {
       home: Scaffold(
         body: RefreshReorderableListView(
           refreshController: refreshController,
+          refreshState: refreshState,
           enablePullDown: false,
           children: <Widget>[
             for (final String label in <String>['A', 'B', 'C'])
@@ -40,6 +42,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(reorders, isNotEmpty);
+    await tester.pumpWidget(const SizedBox());
     refreshController.dispose();
+    refreshState.dispose();
   });
 }

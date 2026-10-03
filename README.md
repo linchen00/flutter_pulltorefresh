@@ -57,6 +57,7 @@ class RefreshList extends StatefulWidget {
 }
 
 class _RefreshListState extends State<RefreshList> {
+  final RefreshState _refreshState = RefreshState();
   final RefreshController _controller = RefreshController();
   List<String> _items = List.generate(8, (index) => '${index + 1}');
 
@@ -64,25 +65,27 @@ class _RefreshListState extends State<RefreshList> {
     await Future<void>.delayed(const Duration(seconds: 1));
     if (!mounted) return;
     setState(() => _items = List.generate(8, (index) => '${index + 1}'));
-    _controller.refreshCompleted(resetFooterState: true);
+    _refreshState.refreshCompleted(resetFooterState: true);
   }
 
   Future<void> _onLoading() async {
     await Future<void>.delayed(const Duration(seconds: 1));
     if (!mounted) return;
     setState(() => _items.add('${_items.length + 1}'));
-    _controller.loadComplete();
+    _refreshState.loadComplete();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _controller,
       enablePullUp: true,
       header: const WaterDropHeader(),
@@ -99,7 +102,7 @@ class _RefreshListState extends State<RefreshList> {
 }
 ```
 
-The delay simulates a request. Update your own data and finish the status explicitly: refreshFailed() for refresh errors, loadFailed() for loading errors, and loadNoData() when there is no more data. Use resetFooterState: true after refreshing to clear noMore. Create the controller in State, dispose it with the State, and check mounted after asynchronous work.
+The delay simulates a request. Update your own data and finish the status explicitly: refreshFailed() for refresh errors, loadFailed() for loading errors, and loadNoData() when there is no more data. Use resetFooterState: true after refreshing to clear noMore. Create RefreshState and the optional controller in State, dispose both with the State, and check mounted after asynchronous work. RefreshState can also be used without UI; startRefresh/startLoading and direct state updates do not call business callbacks. initialRefresh now belongs to SmartRefresher. This is a breaking API migration; see [state and controller API](propertys_en.md#refreshstate).
 
 ### Global configuration
 
@@ -189,6 +192,7 @@ Do not place Container, Scrollbar, NotificationListener or a custom widget that 
 ```dart
 Scrollbar(
   child: SmartRefresher(
+    state: refreshState,
     controller: controller,
     child: ListView.builder(
       itemCount: items.length,
@@ -198,7 +202,7 @@ Scrollbar(
 )
 ```
 
-This fragment assumes controller and items are defined in State. Use [SliverAnimatedList](example/lib/ui/example/otherwidget/refresh_animatedlist_example.dart) for animated lists and the [adapter example](example/lib/ui/example/otherwidget/refresh_recordable_listview_example.dart) for reordering. Pass SingleChildScrollView's content directly instead of nesting the scroll view. For paging, see [PageScrollPhysics + SliverFillViewport](example/lib/ui/example/otherwidget/refresh_pageView_example.dart).
+This fragment assumes refreshState, controller and items are defined in State; controller may be omitted when only gestures are needed. Use [SliverAnimatedList](example/lib/ui/example/otherwidget/refresh_animatedlist_example.dart) for animated lists and the [adapter example](example/lib/ui/example/otherwidget/refresh_recordable_listview_example.dart) for reordering. Pass SingleChildScrollView's content directly instead of nesting the scroll view. For paging, see [PageScrollPhysics + SliverFillViewport](example/lib/ui/example/otherwidget/refresh_pageView_example.dart).
 
 ## More
 

@@ -24,8 +24,8 @@ class RefreshWithEmptyView extends StatefulWidget {
 class _RefreshWithEmptyViewState extends State<RefreshWithEmptyView> {
   List<String> data = [];
   static const int _pageSize = 10;
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
 
   Widget buildEmpty() {
     // there are two ways
@@ -49,6 +49,7 @@ class _RefreshWithEmptyViewState extends State<RefreshWithEmptyView> {
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _refreshController,
       enablePullUp: data.length != 0,
       enablePullDown: true,
@@ -58,7 +59,7 @@ class _RefreshWithEmptyViewState extends State<RefreshWithEmptyView> {
         setState(() {
           data = List.generate(_pageSize, (index) => "Item ${index + 1}");
         });
-        _refreshController.refreshCompleted(resetFooterState: true);
+        _refreshState.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(const Duration(milliseconds: 1000));
@@ -68,7 +69,7 @@ class _RefreshWithEmptyViewState extends State<RefreshWithEmptyView> {
             data.add("Item ${data.length + 1}");
           }
         });
-        _refreshController.loadComplete();
+        _refreshState.loadComplete();
       },
       child: data.length == 0
           ? buildEmpty()
@@ -78,5 +79,12 @@ class _RefreshWithEmptyViewState extends State<RefreshWithEmptyView> {
               itemExtent: 100.0,
             ),
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }

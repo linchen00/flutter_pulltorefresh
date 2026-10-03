@@ -6,38 +6,71 @@
 
 | 属性 | 类型 | 默认值 / 说明 |
 |---|---|---|
-| controller | RefreshController | 必填，一个控制器对应一个 SmartRefresher |
+| state | RefreshState | 必填，一个状态对应一个挂载中的 SmartRefresher |
+| controller | RefreshController? | null，可选，用于主动 UI 操作 |
+| initialRefresh | bool | false，首帧结束后主动刷新 |
 | child | Widget? | null；ScrollView、Scrollable 和普通 Widget 的处理不同，见 [接入说明](README_CN.md#child) |
 | header | Widget? | 局部设置优先，其次 headerBuilder；未配置时 iOS 使用 ClassicHeader，其他平台使用 MaterialClassicHeader |
 | footer | Widget? | 局部设置优先，其次 footerBuilder；未配置时使用 ClassicFooter |
 | enablePullDown | bool | true |
 | enablePullUp | bool | false |
 | enableTwoLevel | bool | false |
-| onRefresh | VoidCallback? | 进入刷新状态时调用，业务完成后须通过控制器结束刷新 |
-| onLoading | VoidCallback? | 进入加载状态时调用，业务完成后须通过控制器结束加载 |
+| onRefresh | VoidCallback? | 手势或 UI 请求触发，业务完成后通过 RefreshState 结束刷新 |
+| onLoading | VoidCallback? | 手势或 UI 请求触发，业务完成后通过 RefreshState 结束加载 |
 | onTwoLevel | void Function(bool)? | 打开二楼时传 true，关闭时传 false |
 
 普通构造方式还支持 `scrollDirection`、`reverse`、`scrollController`、`primary`、`physics`、`cacheExtent`、`semanticChildCount` 和 `dragStartBehavior`。直接传入 ScrollView 时，这些非空参数优先于 child 的对应属性。重建时还会继承 child 的 `center`、`anchor`、键盘收起方式、恢复标识和裁剪方式，但不会复制全部 ScrollView 属性，例如 `shrinkWrap`。
 
 `SmartRefresher.builder` 提供 `(BuildContext context, RefreshPhysics physics)`，由调用方将 physics 传入滚动组件，并自行把 header/footer 插入 slivers；该构造方式不会自动插入指示器。
 
-## RefreshController
+## RefreshState
 
 ```dart
-RefreshController({
-  bool initialRefresh = false,
+RefreshState({
   RefreshStatus? initialRefreshStatus,
   LoadStatus? initialLoadStatus,
 });
 
-Future<void>? requestRefresh({
+RefreshNotifier<RefreshStatus>? headerMode;
+RefreshNotifier<LoadStatus>? footerMode;
+RefreshStatus? get headerStatus;
+LoadStatus? get footerStatus;
+bool get isRefresh;
+bool get isLoading;
+bool get isTwoLevel;
+bool get isDisposed;
+
+void startRefresh();
+void startLoading();
+void refreshCompleted({bool resetFooterState = false});
+void refreshFailed();
+void refreshToIdle();
+void loadComplete();
+void loadFailed();
+void loadNoData();
+void resetNoData();
+void dispose();
+```
+
+初始状态默认都是 idle，挂载和重新挂载时会保留。状态更新同步完成，不依赖 UI 或帧调度。原控制器的状态查询和监听迁移到此对象；headerMode/footerMode 从 RefreshController 原样迁移。
+
+startRefresh/startLoading 和直接修改 notifier.value 只更新状态与指示器钩子，不调用 onRefresh/onLoading，也不请求滚动。完成、失败和重置方法也归 RefreshState。resetNoData 只清除 noMore；refreshCompleted(resetFooterState: true) 会调用它。
+
+使用方创建和释放状态。一个状态同时绑定一个 SmartRefresher，可以有任意数量的业务监听者，解绑后可重新挂载。dispose 可重复调用；释放后调用状态更新方法会报错。
+
+## RefreshController
+
+```dart
+RefreshController();
+
+Future<void> requestRefresh({
   bool needMove = true,
   bool needCallback = true,
   Duration duration = const Duration(milliseconds: 500),
   Curve curve = Curves.linear,
 });
 
-Future<void>? requestLoading({
+Future<void> requestLoading({
   bool needMove = true,
   bool needCallback = true,
   Duration duration = const Duration(milliseconds: 300),
@@ -49,29 +82,24 @@ Future<void> requestTwoLevel({
   Curve curve = Curves.linear,
 });
 
-void refreshCompleted({bool resetFooterState = false});
-void refreshFailed();
-void refreshToIdle();
-Future<void>? twoLevelComplete({
+Future<void> twoLevelComplete({
   Duration duration = const Duration(milliseconds: 500),
   Curve curve = Curves.linear,
 });
-void loadComplete();
-void loadFailed();
-void loadNoData();
-void resetNoData();
+
+ScrollPosition? get position;
 void dispose();
 ```
 
 以上是签名参考，不是可直接执行的顶层函数定义。
 
-- `initialRefresh` 在首帧结束后主动请求刷新。初始状态默认都是 idle；头部指示器初始化时会把 headerMode 重置为 idle，因此不要用 initialRefreshStatus 替代 initialRefresh。
-- `position` 在指示器连接滚动位置后才可用。主动请求应在布局完成之后调用，并确保对应指示器已启用。
-- `needMove` 控制是否移动到边界；返回的 Future 表示请求/移动流程结束，不表示业务请求完成。`requestRefresh(needMove: false)` 和 `twoLevelComplete()` 当前返回 null，不能依赖它们等待动画或业务结束。
-- `needCallback: false` 当前只在 `needMove: true` 分支生效。该分支直接修改状态而不通知 notifier 监听器，因此也会跳过依赖状态通知的指示器钩子；`needMove: false` 仍会触发业务回调。
-- `loadComplete()`、`loadFailed()`、`loadNoData()` 在帧结束后更新 footer 状态，给数据布局留出时间，防止重复加载。
-- `resetNoData()` 只将 noMore 重置为 idle；`refreshCompleted(resetFooterState: true)` 会调用它。
-- 可读取 `headerStatus`、`footerStatus`、`isRefresh`、`isLoading`、`isTwoLevel`，或监听 `headerMode` / `footerMode`。滚动监听使用自己的 ScrollController；RefreshController 不再提供 scrollController。
+- 控制器可选，只请求 UI 操作，不拥有刷新/加载状态及其 notifier。
+- position 在指示器连接滚动位置后才可用，解绑后为 null。主动请求应在布局完成后调用，并启用对应功能和指示器，否则 Future 报 StateError。
+- needMove 控制是否移动到边界。所有操作返回非空 Future<void>，表示 UI 操作结束，不表示业务请求完成。
+- needCallback: false 在两个 needMove 分支下都不触发 onRefresh/onLoading，状态监听与指示器钩子仍正常执行。
+- 手势和控制器请求流程显式触发业务回调；挂载已有刷新/加载状态不会再次触发业务请求。
+- 替换控制器时保留传入的 RefreshState。卸载、替换或释放后，旧操作不能继续更新状态或调用业务回调。
+- SmartRefresher(initialRefresh: true) 在首帧结束后主动请求刷新，也支持不传外部控制器。
 
 ## RefreshConfiguration
 

@@ -6,38 +6,71 @@ This document describes this checkout: Dart ≥3.0 and Flutter ≥3.32. The pack
 
 | Property | Type | Default / behavior |
 |---|---|---|
-| controller | RefreshController | Required; one controller per SmartRefresher |
+| state | RefreshState | Required; one state per mounted SmartRefresher |
+| controller | RefreshController? | null; optional UI operations |
+| initialRefresh | bool | false; request refresh after the first frame |
 | child | Widget? | null; ScrollView, Scrollable and ordinary widgets use different paths; see [integration](README.md#child) |
 | header | Widget? | Explicit header, then headerBuilder; otherwise ClassicHeader on iOS and MaterialClassicHeader elsewhere |
 | footer | Widget? | Explicit footer, then footerBuilder; otherwise ClassicFooter |
 | enablePullDown | bool | true |
 | enablePullUp | bool | false |
 | enableTwoLevel | bool | false |
-| onRefresh | VoidCallback? | Called on entry to refreshing; finish through the controller |
-| onLoading | VoidCallback? | Called on entry to loading; finish through the controller |
+| onRefresh | VoidCallback? | Called by gestures or UI requests; finish through RefreshState |
+| onLoading | VoidCallback? | Called by gestures or UI requests; finish through RefreshState |
 | onTwoLevel | void Function(bool)? | true when opening, false when closing |
 
 The ordinary constructor also accepts `scrollDirection`, `reverse`, `scrollController`, `primary`, `physics`, `cacheExtent`, `semanticChildCount` and `dragStartBehavior`. With a direct ScrollView child, non-null overrides take precedence over its matching properties. The rebuilt view also inherits center, anchor, keyboard dismissal, restoration ID and clipping, but does not copy every ScrollView property, such as shrinkWrap.
 
 `SmartRefresher.builder` supplies `(BuildContext context, RefreshPhysics physics)`. Pass physics to the scrollable and insert header/footer into its slivers yourself; this constructor does not insert indicators.
 
-## RefreshController
+## RefreshState
 
 ```dart
-RefreshController({
-  bool initialRefresh = false,
+RefreshState({
   RefreshStatus? initialRefreshStatus,
   LoadStatus? initialLoadStatus,
 });
 
-Future<void>? requestRefresh({
+RefreshNotifier<RefreshStatus>? headerMode;
+RefreshNotifier<LoadStatus>? footerMode;
+RefreshStatus? get headerStatus;
+LoadStatus? get footerStatus;
+bool get isRefresh;
+bool get isLoading;
+bool get isTwoLevel;
+bool get isDisposed;
+
+void startRefresh();
+void startLoading();
+void refreshCompleted({bool resetFooterState = false});
+void refreshFailed();
+void refreshToIdle();
+void loadComplete();
+void loadFailed();
+void loadNoData();
+void resetNoData();
+void dispose();
+```
+
+Initial statuses default to idle and survive mounting and remounting. All state updates are synchronous and work without a UI or frame scheduling. Reading and listening move from the controller to this object. headerMode/footerMode are transferred unchanged from RefreshController.
+
+startRefresh/startLoading and direct notifier.value assignments update the status and indicator hooks without calling onRefresh/onLoading or requesting scrolling. Completion/failure methods also belong to RefreshState. resetNoData clears only noMore; refreshCompleted(resetFooterState: true) calls it.
+
+The caller creates and disposes the state. One state can bind one SmartRefresher at a time, with any number of business listeners; it can be reused after unmounting. Dispose is repeatable; methods reject updates after disposal.
+
+## RefreshController
+
+```dart
+RefreshController();
+
+Future<void> requestRefresh({
   bool needMove = true,
   bool needCallback = true,
   Duration duration = const Duration(milliseconds: 500),
   Curve curve = Curves.linear,
 });
 
-Future<void>? requestLoading({
+Future<void> requestLoading({
   bool needMove = true,
   bool needCallback = true,
   Duration duration = const Duration(milliseconds: 300),
@@ -49,29 +82,24 @@ Future<void> requestTwoLevel({
   Curve curve = Curves.linear,
 });
 
-void refreshCompleted({bool resetFooterState = false});
-void refreshFailed();
-void refreshToIdle();
-Future<void>? twoLevelComplete({
+Future<void> twoLevelComplete({
   Duration duration = const Duration(milliseconds: 500),
   Curve curve = Curves.linear,
 });
-void loadComplete();
-void loadFailed();
-void loadNoData();
-void resetNoData();
+
+ScrollPosition? get position;
 void dispose();
 ```
 
 These are signature references, not executable top-level function definitions.
 
-- initialRefresh requests refresh after the first frame. Both initial statuses default to idle; mounting the header resets headerMode to idle, so initialRefreshStatus is not a replacement for initialRefresh.
-- position becomes available when an indicator attaches to its ScrollPosition. Request operations after layout, with the corresponding indicator enabled.
-- needMove controls movement to the boundary. A returned Future covers the request/movement, not completion of your data request. Currently requestRefresh(needMove: false) and twoLevelComplete() return null; do not await them to track animations or data work.
-- needCallback: false currently works only with needMove: true. This branch changes status without notifying notifier listeners, also bypassing indicator hooks that depend on those notifications. With needMove: false, business callbacks still run.
-- loadComplete(), loadFailed() and loadNoData() update the footer after the frame, allowing data layout to complete and preventing duplicate loads.
-- resetNoData() resets only noMore to idle; refreshCompleted(resetFooterState: true) calls it.
-- Read headerStatus, footerStatus, isRefresh, isLoading and isTwoLevel, or listen to headerMode / footerMode. Use your own ScrollController for scroll listeners; RefreshController no longer exposes scrollController.
+- The controller is optional. It requests UI operations and does not own refresh/loading state or its notifiers.
+- position is available after an indicator attaches, and becomes null after detachment. Invoke requests after layout with the corresponding feature and indicator enabled; otherwise the Future reports StateError.
+- needMove controls movement to the boundary. Every operation returns a non-null Future<void> for the UI operation, not your data request.
+- needCallback: false suppresses onRefresh/onLoading for both needMove branches. Status listeners and indicator hooks still run.
+- Gesture and controller request flows invoke business callbacks explicitly. Mounting an existing active state does not invoke them again.
+- Replacing a controller retains the supplied RefreshState. Unmounting, replacement or disposal invalidates old operations, so they cannot publish stale state or callbacks.
+- SmartRefresher(initialRefresh: true) requests refresh after the first frame, including without an external controller.
 
 ## RefreshConfiguration
 

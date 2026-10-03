@@ -25,6 +25,7 @@ class HideFooterManual extends StatefulWidget {
 }
 
 class HideFooterManualState extends State<HideFooterManual> {
+  RefreshState _state = RefreshState();
   RefreshController _controller = RefreshController();
 
   List<String> strs = ["1", "2"];
@@ -44,19 +45,20 @@ class HideFooterManualState extends State<HideFooterManual> {
               ),
               Expanded(
                 child: SmartRefresher(
+                  state: _state,
                   controller: _controller,
                   enablePullUp: refresherHeight < 100.0 * strs.length,
                   //100.0 is itemExtent in SliverList
                   onLoading: () {
                     strs.add("new");
                     if (mounted) setState(() {});
-                    _controller.loadComplete();
+                    _state.loadComplete();
                   },
                   onRefresh: () {
                     Future.delayed(const Duration(milliseconds: 500)).then((_) {
                       if (!mounted) return;
                       setState(() => strs = ["1", "2"]);
-                      _controller.refreshCompleted(resetFooterState: true);
+                      _state.refreshCompleted(resetFooterState: true);
                     });
                   },
                   child: CustomScrollView(
@@ -77,5 +79,12 @@ class HideFooterManualState extends State<HideFooterManual> {
       ),
       hideFooterWhenNotFull: false,
     );
+  }
+
+  @override
+  void dispose() {
+    _state.dispose();
+    _controller.dispose();
+    super.dispose();
   }
 }

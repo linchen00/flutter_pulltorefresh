@@ -16,6 +16,7 @@ void main() {
     testWidgets(
         "clamping physics,when user flip gesture up ,it shouldn't move out of viewport area",
         (tester) async {
+      final RefreshState _refreshState = RefreshState();
       final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -31,6 +32,7 @@ void main() {
             itemCount: 23,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -74,6 +76,7 @@ void main() {
     });
 
     testWidgets("verity if it will spring back when jumpto", (tester) async {
+      final RefreshState _refreshState = RefreshState();
       final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -89,6 +92,7 @@ void main() {
             itemCount: 23,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -103,6 +107,7 @@ void main() {
 
     testWidgets("When clamping,enablePullDown = false,it shouldn't overscroll",
         (tester) async {
+      final RefreshState _refreshState = RefreshState();
       final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -118,6 +123,7 @@ void main() {
             itemCount: 23,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -150,6 +156,7 @@ void main() {
 
   testWidgets("maxOverScrollExtent or maxUnderScrollExtent verity ",
       (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.android),
@@ -166,6 +173,7 @@ void main() {
             itemCount: 23,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
         maxOverScrollExtent: 240.0,
@@ -193,6 +201,7 @@ void main() {
   });
 
   testWidgets("verity if refresh physics updated ", (tester) async {
+    final RefreshState refreshState = RefreshState();
     final RefreshController refreshController = RefreshController();
     await tester.pumpWidget(MaterialApp(
       home: RefreshConfiguration(
@@ -208,6 +217,7 @@ void main() {
             itemCount: 23,
             itemExtent: 100,
           ),
+          state: refreshState,
           controller: refreshController,
         ),
         maxOverScrollExtent: 200.0,
@@ -230,6 +240,7 @@ void main() {
             itemCount: 23,
             itemExtent: 100,
           ),
+          state: refreshState,
           controller: refreshController,
         ),
         maxOverScrollExtent: 150.0,
@@ -257,6 +268,7 @@ void main() {
             itemCount: 23,
             itemExtent: 100,
           ),
+          state: refreshState,
           controller: refreshController,
         ),
         maxOverScrollExtent: 200.0,
@@ -279,6 +291,7 @@ void main() {
             itemCount: 23,
             itemExtent: 100,
           ),
+          state: refreshState,
           controller: refreshController,
         ),
         maxOverScrollExtent: 200.0,
@@ -291,6 +304,7 @@ void main() {
 
   testWidgets("when viewport not full, pull up can trigger loading",
       (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -310,6 +324,7 @@ void main() {
             itemCount: 1,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
         footerTriggerDistance: -30.0,
@@ -318,7 +333,7 @@ void main() {
 
     await tester.drag(find.byType(Scrollable), const Offset(0, -70.0));
     await tester.pumpAndSettle(Duration(milliseconds: 2));
-    expect(_refreshController.footerStatus, LoadStatus.loading);
+    expect(_refreshState.footerStatus, LoadStatus.loading);
     expect(_refreshController.position!.pixels, greaterThanOrEqualTo(0.0));
 
     await tester.pumpWidget(Directionality(
@@ -339,6 +354,7 @@ void main() {
             itemCount: 1,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
         footerTriggerDistance: -30.0,
@@ -347,7 +363,7 @@ void main() {
 
     await tester.drag(find.byType(Scrollable), const Offset(0, -70.0));
     await tester.pumpAndSettle(Duration(milliseconds: 2));
-    expect(_refreshController.footerStatus, LoadStatus.loading);
+    expect(_refreshState.footerStatus, LoadStatus.loading);
     expect(_refreshController.position!.pixels, greaterThanOrEqualTo(0.0));
   });
 }

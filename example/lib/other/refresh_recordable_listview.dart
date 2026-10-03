@@ -58,7 +58,8 @@ class RefreshReorderableListView extends StatefulWidget {
 
   final VoidCallback? onRefresh, onLoading;
 
-  final RefreshController refreshController;
+  final RefreshController? refreshController;
+  final RefreshState refreshState;
 
   /// Creates a reorderable list.
   RefreshReorderableListView({
@@ -68,7 +69,8 @@ class RefreshReorderableListView extends StatefulWidget {
     this.scrollDirection = Axis.vertical,
     this.padding,
     this.reverse = false,
-    required this.refreshController,
+    this.refreshController,
+    required this.refreshState,
     this.refreshHeader,
     this.refreshFooter,
     this.enablePullDown = true,
@@ -152,6 +154,7 @@ class _ReorderableListViewState extends State<RefreshReorderableListView> {
           padding: widget.padding,
           reverse: widget.reverse,
           refreshController: widget.refreshController,
+          refreshState: widget.refreshState,
           enablePullDown: widget.enablePullDown,
           enablePullUp: widget.enablePullUp,
           refreshFooter: widget.refreshFooter,
@@ -181,7 +184,8 @@ class _ReorderableListContent extends StatefulWidget {
     required this.padding,
     required this.onReorder,
     required this.reverse,
-    required this.refreshController,
+    this.refreshController,
+    required this.refreshState,
     this.refreshHeader,
     this.refreshFooter,
     this.enablePullDown = true,
@@ -200,7 +204,8 @@ class _ReorderableListContent extends StatefulWidget {
 
   final VoidCallback? onRefresh, onLoading;
 
-  final RefreshController refreshController;
+  final RefreshController? refreshController;
+  final RefreshState refreshState;
 
   final Widget? header;
   final List<Widget?> children;
@@ -633,6 +638,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent>
           controller: _scrollController,
           reverse: widget.reverse!,
         ),
+        state: widget.refreshState,
         controller: widget.refreshController,
         enablePullDown: widget.enablePullDown,
         enablePullUp: widget.enablePullUp,

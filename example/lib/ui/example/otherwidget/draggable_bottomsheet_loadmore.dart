@@ -21,6 +21,7 @@ class DraggableLoadingBottomSheet extends StatefulWidget {
 
 class _DraggableLoadingBottomSheetState
     extends State<DraggableLoadingBottomSheet> {
+  RefreshState _state = RefreshState();
   RefreshController _controller = RefreshController();
 
   List<String> items = [];
@@ -65,6 +66,7 @@ class _DraggableLoadingBottomSheetState
                                 physics: ClampingScrollPhysics(),
                                 itemCount: items.length,
                               ),
+                              state: _state,
                               controller: _controller,
                               onLoading: () async {
                                 await Future.delayed(
@@ -74,7 +76,7 @@ class _DraggableLoadingBottomSheetState
                                   items.add("数据 ${items.length + 1}");
                                 }
                                 setter(() {});
-                                _controller.loadComplete();
+                                _state.loadComplete();
                               },
                               enablePullUp: true,
                               enablePullDown: false,
@@ -90,5 +92,12 @@ class _DraggableLoadingBottomSheetState
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _state.dispose();
+    super.dispose();
   }
 }

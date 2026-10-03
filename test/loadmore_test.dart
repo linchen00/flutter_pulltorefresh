@@ -14,8 +14,8 @@ import 'test_indicator.dart';
 void main() {
   testWidgets("from bottom pull up release gesture to load more",
       (tester) async {
-    final RefreshController _refreshController =
-        RefreshController(initialRefresh: true);
+    final RefreshState _refreshState = RefreshState();
+    final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: SmartRefresher(
@@ -30,6 +30,8 @@ void main() {
           itemCount: 20,
           itemExtent: 100,
         ),
+        state: _refreshState,
+        initialRefresh: true,
         controller: _refreshController,
       ),
     ));
@@ -37,14 +39,14 @@ void main() {
         .jumpTo(_refreshController.position!.maxScrollExtent - 30);
     await tester.drag(find.byType(Scrollable), const Offset(0, -30.0));
     await tester.pump();
-//    expect(_refreshController.footerStatus, LoadStatus.idle);
+//    expect(_refreshState.footerStatus, LoadStatus.idle);
     await tester.pumpAndSettle(Duration(milliseconds: 500));
-    expect(_refreshController.footerStatus, LoadStatus.loading);
+    expect(_refreshState.footerStatus, LoadStatus.loading);
   });
 
   testWidgets("strick to check tigger judge", (tester) async {
-    final RefreshController _refreshController =
-        RefreshController(initialRefresh: true);
+    final RefreshState _refreshState = RefreshState();
+    final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: SmartRefresher(
@@ -59,6 +61,8 @@ void main() {
           itemCount: 20,
           itemExtent: 100,
         ),
+        state: _refreshState,
+        initialRefresh: true,
         controller: _refreshController,
       ),
     ));
@@ -66,14 +70,14 @@ void main() {
         .jumpTo(_refreshController.position!.maxScrollExtent - 216);
     await tester.drag(find.byType(Scrollable), const Offset(0, -200.0));
     await tester.pump();
-    expect(_refreshController.footerStatus, LoadStatus.idle);
+    expect(_refreshState.footerStatus, LoadStatus.idle);
     await tester.pump(Duration(milliseconds: 100));
-    expect(_refreshController.footerStatus, LoadStatus.idle);
+    expect(_refreshState.footerStatus, LoadStatus.idle);
   });
 
   testWidgets("enableBallsticLoad=false test", (tester) async {
-    final RefreshController _refreshController =
-        RefreshController(initialRefresh: true);
+    final RefreshState _refreshState = RefreshState();
+    final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: RefreshConfiguration(
@@ -90,6 +94,8 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
+          initialRefresh: true,
           controller: _refreshController,
         ),
         footerTriggerDistance: -50,
@@ -104,28 +110,28 @@ void main() {
     await tester.fling(find.byType(Scrollable), const Offset(0, -300.0), 2200);
     await tester.pump();
     while (tester.binding.transientCallbackCount > 0) {
-      expect(_refreshController.footerStatus, LoadStatus.idle);
+      expect(_refreshState.footerStatus, LoadStatus.idle);
       await tester.pump(const Duration(milliseconds: 20));
     }
 
     // drag to bottom out of edge
     _refreshController.position!
         .jumpTo(_refreshController.position!.maxScrollExtent);
-    expect(_refreshController.footerStatus, LoadStatus.idle);
+    expect(_refreshState.footerStatus, LoadStatus.idle);
     await tester.drag(find.byType(Scrollable), const Offset(0, -90.0));
-    expect(_refreshController.footerStatus, LoadStatus.canLoading);
+    expect(_refreshState.footerStatus, LoadStatus.canLoading);
     await tester.pump();
     await tester.pumpAndSettle();
-    expect(_refreshController.footerStatus, LoadStatus.loading);
+    expect(_refreshState.footerStatus, LoadStatus.loading);
 
-    _refreshController.loadFailed();
+    _refreshState.loadFailed();
     //fling to bottom when mode = failed
     _refreshController.position!
         .jumpTo(_refreshController.position!.maxScrollExtent - 500);
     await tester.fling(find.byType(Scrollable), const Offset(0, -300.0), 2200);
     await tester.pump();
     while (tester.binding.transientCallbackCount > 0) {
-      expect(_refreshController.footerStatus, LoadStatus.failed);
+      expect(_refreshState.footerStatus, LoadStatus.failed);
       await tester.pump(const Duration(milliseconds: 20));
     }
   });
@@ -133,8 +139,8 @@ void main() {
   testWidgets(
       "far from bottom,flip to bottom by ballstic also can trigger loading",
       (tester) async {
-    final RefreshController _refreshController =
-        RefreshController(initialRefresh: true);
+    final RefreshState _refreshState = RefreshState();
+    final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: SmartRefresher(
@@ -149,6 +155,8 @@ void main() {
           itemCount: 20,
           itemExtent: 100,
         ),
+        state: _refreshState,
+        initialRefresh: true,
         controller: _refreshController,
       ),
     ));
@@ -156,13 +164,13 @@ void main() {
         .jumpTo(_refreshController.position!.maxScrollExtent - 500);
     await tester.fling(find.byType(Scrollable), const Offset(0, -300.0), 2200);
     await tester.pump();
-    expect(_refreshController.footerStatus, LoadStatus.idle);
+    expect(_refreshState.footerStatus, LoadStatus.idle);
     while (tester.binding.transientCallbackCount > 0) {
       //15.0 is default
       if (_refreshController.position!.extentAfter < 15) {
-        expect(_refreshController.footerStatus, LoadStatus.loading);
+        expect(_refreshState.footerStatus, LoadStatus.loading);
       } else {
-        expect(_refreshController.footerStatus, LoadStatus.idle);
+        expect(_refreshState.footerStatus, LoadStatus.idle);
       }
       await tester.pump(const Duration(milliseconds: 20));
     }
@@ -170,8 +178,9 @@ void main() {
 
   testWidgets("if the status is noMore,it shouldn't enable footer to loading",
       (tester) async {
-    final RefreshController _refreshController =
-        RefreshController(initialLoadStatus: LoadStatus.noMore);
+    final RefreshState _refreshState =
+        RefreshState(initialLoadStatus: LoadStatus.noMore);
+    final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: SmartRefresher(
@@ -186,6 +195,7 @@ void main() {
           itemCount: 20,
           itemExtent: 100,
         ),
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -193,25 +203,25 @@ void main() {
         .jumpTo(_refreshController.position!.maxScrollExtent - 216);
     await tester.drag(find.byType(Scrollable), const Offset(0, -400.0));
     await tester.pump();
-    expect(_refreshController.footerStatus, LoadStatus.noMore);
+    expect(_refreshState.footerStatus, LoadStatus.noMore);
     await tester.pump(Duration(milliseconds: 100));
-    expect(_refreshController.footerStatus, LoadStatus.noMore);
+    expect(_refreshState.footerStatus, LoadStatus.noMore);
 
     _refreshController.position!
         .jumpTo(_refreshController.position!.maxScrollExtent - 500);
     await tester.fling(find.byType(Scrollable), const Offset(0, -300.0), 2200);
     await tester.pump();
-    expect(_refreshController.footerStatus, LoadStatus.noMore);
+    expect(_refreshState.footerStatus, LoadStatus.noMore);
     while (tester.binding.transientCallbackCount > 0) {
-      expect(_refreshController.footerStatus, LoadStatus.noMore);
+      expect(_refreshState.footerStatus, LoadStatus.noMore);
       await tester.pump(const Duration(milliseconds: 20));
     }
   });
 
   group("when footer in Viewport is not full with one page", () {
     testWidgets("pull down shouldn't trigger load more", (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: true);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -226,6 +236,8 @@ void main() {
             itemCount: 3,
             itemExtent: 100,
           ),
+          state: _refreshState,
+          initialRefresh: true,
           controller: _refreshController,
         ),
       ));
@@ -233,21 +245,21 @@ void main() {
       await tester.drag(find.byType(Scrollable), const Offset(0, 10.0));
       await tester.pump();
       await tester.pump(Duration(milliseconds: 20));
-      expect(_refreshController.footerStatus, LoadStatus.idle);
+      expect(_refreshState.footerStatus, LoadStatus.idle);
       await tester.pumpAndSettle();
       // quickly fling with ballstic
       expect(_refreshController.position!.pixels, 0.0);
       await tester.fling(find.byType(Scrollable), const Offset(0, 100.0), 1000);
       await tester.pump(Duration(milliseconds: 400));
-      expect(_refreshController.footerStatus, LoadStatus.idle);
+      expect(_refreshState.footerStatus, LoadStatus.idle);
       await tester.pumpAndSettle();
       expect(_refreshController.position!.pixels, 0.0);
-      expect(_refreshController.footerStatus, LoadStatus.idle);
+      expect(_refreshState.footerStatus, LoadStatus.idle);
     });
 
     testWidgets("pull up can trigger load more", (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: true);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -262,33 +274,35 @@ void main() {
             itemCount: 3,
             itemExtent: 100,
           ),
+          state: _refreshState,
+          initialRefresh: true,
           controller: _refreshController,
         ),
       ));
 
       await tester.drag(find.byType(Scrollable), const Offset(0, -10.0));
-      expect(_refreshController.footerStatus, LoadStatus.canLoading);
+      expect(_refreshState.footerStatus, LoadStatus.canLoading);
       await tester.pump();
       await tester.pump(Duration(milliseconds: 20));
-      expect(_refreshController.footerStatus, LoadStatus.loading);
+      expect(_refreshState.footerStatus, LoadStatus.loading);
       await tester.pumpAndSettle();
       // quickly fling with ballstic
       expect(_refreshController.position!.pixels, 0.0);
       await tester.fling(
           find.byType(Scrollable), const Offset(0, -100.0), 1000);
       await tester.pump(Duration(milliseconds: 400));
-      expect(_refreshController.footerStatus, LoadStatus.loading);
+      expect(_refreshState.footerStatus, LoadStatus.loading);
       await tester.pumpAndSettle();
       expect(_refreshController.position!.pixels, 0.0);
-      expect(_refreshController.footerStatus, LoadStatus.loading);
+      expect(_refreshState.footerStatus, LoadStatus.loading);
     });
   });
 
   // may be happen #91
   group("check if the loading more times stiuation exists", () {
     testWidgets("loading->idle", (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: true);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       int time = 0;
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -299,7 +313,7 @@ void main() {
           enablePullDown: true,
           onLoading: () {
             time++;
-            _refreshController.loadComplete();
+            _refreshState.loadComplete();
           },
           child: ListView.builder(
             itemBuilder: (c, i) => Center(
@@ -308,6 +322,8 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
+          initialRefresh: true,
           controller: _refreshController,
         ),
       ));
@@ -324,7 +340,7 @@ void main() {
       _refreshController.position!
           .jumpTo(_refreshController.position!.maxScrollExtent - 100);
       await tester.fling(find.byType(Scrollable), const Offset(0, -80.0), 1000);
-      expect(_refreshController.footerStatus, LoadStatus.idle);
+      expect(_refreshState.footerStatus, LoadStatus.idle);
       while (tester.binding.transientCallbackCount > 0) {
         await tester.pump(const Duration(milliseconds: 100));
       }
@@ -332,8 +348,8 @@ void main() {
     });
 
     testWidgets("loading->failed", (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: true);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       int time = 0;
       await tester.pumpWidget(RefreshConfiguration(
         child: Directionality(
@@ -344,7 +360,7 @@ void main() {
             enablePullUp: true,
             enablePullDown: true,
             onLoading: () {
-              _refreshController.loadFailed();
+              _refreshState.loadFailed();
               time++;
             },
             child: ListView.builder(
@@ -354,6 +370,8 @@ void main() {
               itemCount: 20,
               itemExtent: 100,
             ),
+            state: _refreshState,
+            initialRefresh: true,
             controller: _refreshController,
           ),
         ),
@@ -378,6 +396,7 @@ void main() {
     });
 
     testWidgets("loading->noData", (tester) async {
+      final RefreshState _refreshState = RefreshState();
       final RefreshController _refreshController = RefreshController();
       int time = 0;
       await tester.pumpWidget(Directionality(
@@ -388,7 +407,7 @@ void main() {
           enablePullUp: true,
           enablePullDown: true,
           onLoading: () {
-            _refreshController.loadNoData();
+            _refreshState.loadNoData();
             time++;
           },
           child: ListView.builder(
@@ -398,6 +417,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -420,6 +440,7 @@ void main() {
     });
 
     testWidgets("load more with 0 trigger distance", (tester) async {
+      final RefreshState _refreshState = RefreshState();
       final RefreshController _refreshController = RefreshController();
       int time = 0;
       await tester.pumpWidget(Directionality(
@@ -433,7 +454,7 @@ void main() {
             enablePullDown: true,
             onLoading: () async {
               await Future.delayed(const Duration(milliseconds: 180));
-              _refreshController.loadComplete();
+              _refreshState.loadComplete();
               time++;
             },
             child: ListView.builder(
@@ -443,6 +464,7 @@ void main() {
               itemCount: 20,
               itemExtent: 100,
             ),
+            state: _refreshState,
             controller: _refreshController,
           ),
         ),
@@ -459,6 +481,7 @@ void main() {
   });
 
   testWidgets("when enableLoadingWhenFailed = true", (tester) async {
+    RefreshState _refreshState = RefreshState();
     RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -475,34 +498,36 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
         enableLoadingWhenFailed: true,
       ),
     ));
 
-    _refreshController.footerMode!.value = LoadStatus.failed;
+    _refreshState.footerMode!.value = LoadStatus.failed;
     _refreshController.position!
         .jumpTo(_refreshController.position!.maxScrollExtent - 30.0);
     expect(_refreshController.position!.pixels,
         _refreshController.position!.maxScrollExtent - 30.0);
     await tester.drag(find.byType(Scrollable), const Offset(0, -100.0));
     await tester.pumpAndSettle(Duration(milliseconds: 500));
-    expect(_refreshController.footerStatus, LoadStatus.loading);
+    expect(_refreshState.footerStatus, LoadStatus.loading);
 
-    _refreshController.loadComplete();
+    _refreshState.loadComplete();
     _refreshController.position!
         .jumpTo(_refreshController.position!.maxScrollExtent - 30.0);
     expect(_refreshController.position!.pixels,
         _refreshController.position!.maxScrollExtent - 30.0);
     await tester.pumpAndSettle();
-    expect(_refreshController.footerStatus, LoadStatus.idle);
+    expect(_refreshState.footerStatus, LoadStatus.idle);
     await tester.drag(find.byType(Scrollable), const Offset(0, -100.0));
     await tester.pumpAndSettle();
-    expect(_refreshController.footerStatus, LoadStatus.loading);
+    expect(_refreshState.footerStatus, LoadStatus.loading);
   });
 
   testWidgets("verity footer triggerdistance", (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -519,6 +544,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
         footerTriggerDistance: -30.0,
@@ -531,20 +557,21 @@ void main() {
     await tester.drag(find.byType(Scrollable), const Offset(0, -80.0));
     await tester.pump();
     await tester.pumpAndSettle(Duration(milliseconds: 2));
-    expect(_refreshController.footerStatus, LoadStatus.loading);
+    expect(_refreshState.footerStatus, LoadStatus.loading);
 
-    _refreshController.footerMode!.value = LoadStatus.idle;
+    _refreshState.footerMode!.value = LoadStatus.idle;
     _refreshController.position!
         .jumpTo(_refreshController.position!.maxScrollExtent - 30.0);
     await tester.drag(find.byType(Scrollable), const Offset(0, -59.0));
     await tester.pumpAndSettle();
-    expect(_refreshController.footerStatus, LoadStatus.idle);
+    expect(_refreshState.footerStatus, LoadStatus.idle);
   });
 
   // # 157
   testWidgets(
       "in Android,when viewport not full,it shouldn't make footer out of bottom edge,when enablePullUp = false || hideNotfull || state == nomore",
       (tester) async {
+    RefreshState _refreshState = RefreshState();
     RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -561,13 +588,14 @@ void main() {
           itemCount: 1,
           itemExtent: 100,
         ),
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
     await tester.drag(find.byType(Scrollable), const Offset(0, -200.0));
-    await tester.pumpWidget(Container());
-
     expect(_refreshController.position!.pixels, 0);
+    await tester.pumpWidget(Container());
+    expect(_refreshController.position, isNull);
     await tester.pumpAndSettle();
 
     await tester.pumpWidget(RefreshConfiguration(
@@ -587,6 +615,7 @@ void main() {
             itemCount: 1,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ),
@@ -597,7 +626,7 @@ void main() {
     expect(_refreshController.position!.pixels, 0);
     await tester.pumpAndSettle();
 
-    _refreshController.loadNoData();
+    _refreshState.loadNoData();
     await tester.pumpWidget(RefreshConfiguration(
       hideFooterWhenNotFull: true,
       maxUnderScrollExtent: 0,
@@ -616,6 +645,7 @@ void main() {
             itemCount: 1,
             itemExtent: 22,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ),

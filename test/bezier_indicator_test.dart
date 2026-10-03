@@ -5,12 +5,15 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 void main() {
   testWidgets('BezierCircleHeader builds as a sliver', (tester) async {
+    final RefreshState state = RefreshState();
     final controller = RefreshController();
     addTearDown(controller.dispose);
+    addTearDown(state.dispose);
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SmartRefresher(
+          state: state,
           controller: controller,
           header: BezierCircleHeader(
             dismissType: BezierDismissType.ScaleToCenter,

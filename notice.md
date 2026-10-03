@@ -1,12 +1,13 @@
 # 接入与生命周期注意事项
 
-## 控制器
+## 状态与控制器生命周期
 
-- 在 State 中创建 RefreshController，保持与 SmartRefresher 一致的生命周期；不要在 build 中反复创建，也不要把一个控制器分配给多个刷新组件。
-- 在 State.dispose 中释放控制器。SmartRefresher 卸载会解除位置监听，但不会替你 dispose 控制器的 notifier。
-- 异步业务结束后先检查 mounted，再更新数据和控制器状态。组件不会等待 onRefresh/onLoading 返回的 Future，也不会自动处理业务异常。
-- position 在指示器挂载后才可用。主动请求在首帧结束后调用，或使用 initialRefresh: true。没有相应指示器时，主动请求无法启动该交互。
-- needCallback 与返回 Future 的边界见 [API 文档](propertys.md#refreshcontroller)。
+- 在 build 之外创建 RefreshState 和可选 RefreshController；每个对象同时绑定一个 SmartRefresher。
+- 使用方分别释放状态和控制器。组件卸载只移除 UI 监听与绑定，不释放外部对象；状态可独立于 UI 存活并重新挂载。
+- 异步 UI 业务返回后检查 mounted，再更新数据；通过 RefreshState 报告完成或失败。组件不会等待业务回调的 Future，也不代为处理业务异常。
+- startRefresh/startLoading 和直接修改状态只更新状态与指示器；需要业务回调或主动滚动时使用控制器请求。
+- position 在指示器挂载后可用，解绑后为 null。主动请求在布局完成后调用，或使用 SmartRefresher(initialRefresh: true)。
+- 控制器操作均返回 Future<void>；两个 needMove 分支下，needCallback: false 都保留状态通知，见 [API](propertys.md#refreshcontroller)。
 
 ## 滚动结构
 

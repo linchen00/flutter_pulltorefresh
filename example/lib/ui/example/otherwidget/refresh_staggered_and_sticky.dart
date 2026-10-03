@@ -24,6 +24,7 @@ class RefreshStaggeredAndSticky extends StatefulWidget {
 class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
     with TickerProviderStateMixin {
   late RefreshController _refreshController;
+  late RefreshState _refreshState;
 
   List<Widget> data = [];
 
@@ -70,13 +71,15 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
   @override
   void initState() {
     _getDatas();
-    _refreshController = RefreshController(initialRefresh: true);
+    _refreshState = RefreshState();
+    _refreshController = RefreshController();
     super.initState();
   }
 
   @override
   void dispose() {
     _refreshController.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 
@@ -143,6 +146,8 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
           return SmartRefresher(
             enablePullUp: true,
             enablePullDown: true,
+            state: _refreshState,
+            initialRefresh: true,
             controller: _refreshController,
             header: MaterialClassicHeader(),
             onRefresh: () async {
@@ -152,7 +157,7 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
               length = 10;
               expand = List.filled(expand.length, false);
               if (mounted) setState(() {});
-              _refreshController.refreshCompleted(resetFooterState: true);
+              _refreshState.refreshCompleted(resetFooterState: true);
             },
             child: CustomScrollView(
               slivers: slivers,
@@ -163,7 +168,7 @@ class RefreshStaggeredAndStickyState extends State<RefreshStaggeredAndSticky>
                 if (!mounted) return;
                 length += 10;
                 if (mounted) setState(() {});
-                _refreshController.loadComplete();
+                _refreshState.loadComplete();
               });
             },
           );

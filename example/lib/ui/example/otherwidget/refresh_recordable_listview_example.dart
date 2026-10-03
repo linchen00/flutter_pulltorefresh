@@ -44,6 +44,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey =
       GlobalKey<ScaffoldState>();
   PersistentBottomSheetController? _bottomSheet;
+  RefreshState _refreshState = RefreshState();
   RefreshController _refreshController = RefreshController();
   _ReorderableListType? _itemType = _ReorderableListType.threeLine;
   bool? _reverse = false;
@@ -246,6 +247,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: _items.map<Widget?>(buildListTile).toList(),
           refreshController: _refreshController,
+          refreshState: _refreshState,
           onRefresh: () async {
             await Future.delayed(const Duration(milliseconds: 800));
             if (!mounted) return;
@@ -257,7 +259,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
                     .map((value) => _ListItem(value, false)));
               _reverseSort = false;
             });
-            _refreshController.refreshCompleted(resetFooterState: true);
+            _refreshState.refreshCompleted(resetFooterState: true);
           },
           onLoading: () async {
             await Future.delayed(const Duration(milliseconds: 800));
@@ -268,11 +270,18 @@ class _ListDemoState extends State<ReorderableListDemo> {
                 _items.add(_ListItem('Item ${start + i + 1}', false));
               }
             });
-            _refreshController.loadComplete();
+            _refreshState.loadComplete();
           },
           enablePullUp: true,
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }

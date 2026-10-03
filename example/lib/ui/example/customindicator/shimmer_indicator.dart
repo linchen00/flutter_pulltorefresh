@@ -24,6 +24,7 @@ class ShimmerIndicatorExample extends StatefulWidget {
 
  */
 class _ShimmerIndicatorExampleState extends State<ShimmerIndicatorExample> {
+  RefreshState _refreshState = RefreshState();
   RefreshController _refreshController = RefreshController();
   final List<String> _initialData = [
     "1",
@@ -55,6 +56,7 @@ class _ShimmerIndicatorExampleState extends State<ShimmerIndicatorExample> {
             style: TextStyle(color: Colors.grey, fontSize: 22),
           ),
         ),
+        state: _refreshState,
         controller: _refreshController,
         enablePullUp: true,
         child: ListView.builder(
@@ -66,7 +68,7 @@ class _ShimmerIndicatorExampleState extends State<ShimmerIndicatorExample> {
           await Future.delayed(Duration(milliseconds: 2000));
           if (!mounted) return;
           setState(() => data = List.of(_initialData));
-          _refreshController.refreshCompleted(resetFooterState: true);
+          _refreshState.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 2000));
@@ -76,7 +78,14 @@ class _ShimmerIndicatorExampleState extends State<ShimmerIndicatorExample> {
               data.add("${data.length + 1}");
             }
           });
-          _refreshController.loadComplete();
+          _refreshState.loadComplete();
         });
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }

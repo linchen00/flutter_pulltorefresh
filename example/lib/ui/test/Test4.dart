@@ -15,6 +15,7 @@ class Test4State extends State<Test4> with TickerProviderStateMixin {
   ValueNotifier<double> topOffsetLis = ValueNotifier(0.0);
   ValueNotifier<double> bottomOffsetLis = ValueNotifier(0.0);
   late RefreshController _refreshController;
+  late RefreshState _refreshState;
 
   List<Widget> data = [];
 
@@ -59,12 +60,15 @@ class Test4State extends State<Test4> with TickerProviderStateMixin {
   @override
   void initState() {
     _getDatas();
-    _refreshController = RefreshController(initialRefresh: false);
+    _refreshState = RefreshState();
+    _refreshController = RefreshController();
     super.initState();
   }
 
   @override
   void dispose() {
+    _refreshController.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 
@@ -117,12 +121,13 @@ class Test4State extends State<Test4> with TickerProviderStateMixin {
         onRefresh: () async {
           print("onRefresh");
           await Future.delayed(Duration(milliseconds: 1300));
-          _refreshController.refreshCompleted();
+          _refreshState.refreshCompleted();
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 1300));
-          _refreshController.loadComplete();
+          _refreshState.loadComplete();
         },
+        state: _refreshState,
         controller: _refreshController,
       ),
       hideFooterWhenNotFull: false,

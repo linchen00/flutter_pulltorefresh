@@ -7,7 +7,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/widgets.dart' as prefix0;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -108,38 +107,40 @@ class ForceFullExample extends StatefulWidget {
 }
 
 class _ForceFullExampleState extends State<ForceFullExample> {
+  final RefreshState _refreshState = RefreshState();
   final RefreshController _refreshController = RefreshController();
   int _itemCount = 0;
 
   @override
   void dispose() {
     _refreshController.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _refreshController,
       enablePullUp: true,
       onRefresh: () async {
         await Future.delayed(const Duration(milliseconds: 500));
         if (!mounted) return;
         setState(() => _itemCount = 0);
-        _refreshController.refreshCompleted(resetFooterState: true);
+        _refreshState.refreshCompleted(resetFooterState: true);
       },
       onLoading: () async {
         await Future.delayed(const Duration(milliseconds: 500));
         if (!mounted) return;
         setState(() => _itemCount += 10);
-        _refreshController.loadComplete();
+        _refreshState.loadComplete();
       },
       footer: ClassicFooter(
         loadStyle: LoadStyle.ShowWhenLoading,
       ),
       child: FillEmptyCustomScrollView(
-        enableFillEmpty:
-            _refreshController.footerMode!.value != LoadStatus.noMore,
+        enableFillEmpty: _refreshState.footerMode!.value != LoadStatus.noMore,
         slivers: <Widget>[
           SliverToBoxAdapter(
             child: Text(

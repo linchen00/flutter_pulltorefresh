@@ -56,6 +56,7 @@ class RefreshList extends StatefulWidget {
 }
 
 class _RefreshListState extends State<RefreshList> {
+  final RefreshState _refreshState = RefreshState();
   final RefreshController _controller = RefreshController();
   List<String> _items = List.generate(8, (index) => '${index + 1}');
 
@@ -63,25 +64,27 @@ class _RefreshListState extends State<RefreshList> {
     await Future<void>.delayed(const Duration(seconds: 1));
     if (!mounted) return;
     setState(() => _items = List.generate(8, (index) => '${index + 1}'));
-    _controller.refreshCompleted(resetFooterState: true);
+    _refreshState.refreshCompleted(resetFooterState: true);
   }
 
   Future<void> _onLoading() async {
     await Future<void>.delayed(const Duration(seconds: 1));
     if (!mounted) return;
     setState(() => _items.add('${_items.length + 1}'));
-    _controller.loadComplete();
+    _refreshState.loadComplete();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
+      state: _refreshState,
       controller: _controller,
       enablePullUp: true,
       header: const WaterDropHeader(),
@@ -98,7 +101,9 @@ class _RefreshListState extends State<RefreshList> {
 }
 ```
 
-示例用延时模拟请求。真实业务需要自行更新数据并结束状态：刷新失败调用 refreshFailed()，加载失败调用 loadFailed()，无更多数据调用 loadNoData()。刷新后使用 resetFooterState: true 恢复无更多数据状态。控制器在 State 中创建并在 dispose 中释放；异步操作完成后先检查 mounted。
+示例用延时模拟请求。真实业务需要自行更新数据并结束状态：刷新失败调用 refreshFailed()，加载失败调用 loadFailed()，无更多数据调用 loadNoData()。刷新后使用 resetFooterState: true 恢复无更多数据状态。状态和可选控制器在 State 中创建并分别在 dispose 中释放；异步操作完成后先检查 mounted。
+
+RefreshState 必填，controller 可选。状态可脱离 UI 使用；startRefresh/startLoading 和直接修改状态不触发业务回调。initialRefresh 现属于 SmartRefresher。此次 API 直接迁移，见 [状态与控制器 API](propertys.md#refreshstate)。
 
 ### 全局配置
 
@@ -182,6 +187,7 @@ SmartRefresher 根据 child 的实际类型处理滚动结构：
 ```dart
 Scrollbar(
   child: SmartRefresher(
+    state: refreshState,
     controller: controller,
     child: ListView.builder(
       itemCount: items.length,
@@ -191,7 +197,7 @@ Scrollbar(
 )
 ```
 
-该片段假定 controller 和 items 已在 State 中定义。AnimatedList 使用 [SliverAnimatedList 示例](example/lib/ui/example/otherwidget/refresh_animatedlist_example.dart)；拖拽排序使用 [适配示例](example/lib/ui/example/otherwidget/refresh_recordable_listview_example.dart)。不要直接嵌入 SingleChildScrollView，直接传入它的内容。分页接入参考 [PageScrollPhysics + SliverFillViewport 示例](example/lib/ui/example/otherwidget/refresh_pageView_example.dart)。
+该片段假定 refreshState、controller 和 items 已在 State 中定义；只需要手势时可省略 controller。AnimatedList 使用 [SliverAnimatedList 示例](example/lib/ui/example/otherwidget/refresh_animatedlist_example.dart)；拖拽排序使用 [适配示例](example/lib/ui/example/otherwidget/refresh_recordable_listview_example.dart)。不要直接嵌入 SingleChildScrollView，直接传入它的内容。分页接入参考 [PageScrollPhysics + SliverFillViewport 示例](example/lib/ui/example/otherwidget/refresh_pageView_example.dart)。
 
 ## 更多
 

@@ -14,8 +14,8 @@ import 'test_indicator.dart';
 void main() {
   group("trigger refresh function test", () {
     testWidgets("not enough to tigger refresh ", (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: false);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -30,6 +30,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -37,14 +38,14 @@ void main() {
       await tester.drag(find.byType(Scrollable), Offset(0, 50.0),
           touchSlopY: 0.0);
       await tester.pump();
-      expect(_refreshController.headerStatus, RefreshStatus.idle);
+      expect(_refreshState.headerStatus, RefreshStatus.idle);
       await tester.pumpAndSettle(Duration(milliseconds: 600));
     });
 
     testWidgets("strick to check triggerDistance,even if 0.00001",
         (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: false);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -59,6 +60,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -68,12 +70,12 @@ void main() {
       await tester.drag(find.byType(Scrollable), Offset(0, 79.999999999),
           touchSlopY: 0.0);
       await tester.pump();
-      expect(_refreshController.headerStatus, RefreshStatus.idle);
+      expect(_refreshState.headerStatus, RefreshStatus.idle);
       await tester.pumpAndSettle(Duration(milliseconds: 600));
     });
     testWidgets("from 0.0 pull down,reach triggerDistance", (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: false);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -88,21 +90,22 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
       await tester.drag(find.byType(Scrollable), Offset(0, 80.0),
           touchSlopY: 0.0);
       await tester.pump();
-      expect(_refreshController.headerStatus, RefreshStatus.canRefresh);
+      expect(_refreshState.headerStatus, RefreshStatus.canRefresh);
       await tester.pumpAndSettle(Duration(milliseconds: 100));
-      expect(_refreshController.headerStatus, RefreshStatus.refreshing);
-      _refreshController.refreshCompleted();
+      expect(_refreshState.headerStatus, RefreshStatus.refreshing);
+      _refreshState.refreshCompleted();
       await tester.pumpAndSettle(Duration(milliseconds: 600));
     });
     testWidgets("from 100.0 pull down,reach triggerdistance", (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: false);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -117,6 +120,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -125,17 +129,17 @@ void main() {
       await tester.pump(Duration(milliseconds: 100));
       await tester.drag(find.byType(Scrollable), Offset(0, 180.0),
           touchSlopY: 0.0);
-      expect(_refreshController.headerStatus, RefreshStatus.canRefresh);
+      expect(_refreshState.headerStatus, RefreshStatus.canRefresh);
       await tester.pumpAndSettle(Duration(milliseconds: 100));
-      expect(_refreshController.headerStatus, RefreshStatus.refreshing);
-      _refreshController.refreshCompleted();
+      expect(_refreshState.headerStatus, RefreshStatus.refreshing);
+      _refreshState.refreshCompleted();
       await tester.pumpAndSettle(Duration(milliseconds: 600));
     });
     testWidgets(
         "when user flip with ballistic,it should not be tigger rrerfresh ",
         (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: false);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -150,6 +154,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -159,14 +164,14 @@ void main() {
       while (tester.binding.transientCallbackCount > 0) {
         await tester.pump(const Duration(milliseconds: 20));
       }
-      expect(_refreshController.headerStatus, RefreshStatus.idle);
+      expect(_refreshState.headerStatus, RefreshStatus.idle);
       await tester.pumpAndSettle(Duration(milliseconds: 600));
     });
     testWidgets(
         " when user flip with ballistic from 0.0,it should not be tigger rrerfresh also",
         (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: false);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -181,6 +186,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -190,14 +196,14 @@ void main() {
       while (tester.binding.transientCallbackCount > 0) {
         await tester.pump(const Duration(milliseconds: 20));
       }
-      expect(_refreshController.headerStatus, RefreshStatus.idle);
+      expect(_refreshState.headerStatus, RefreshStatus.idle);
       await tester.pumpAndSettle(Duration(milliseconds: 600));
     });
     testWidgets(
         "consider about another situation,if user trriiger refresh, and then drag down(cannot see the header)",
         (tester) async {
-      final RefreshController _refreshController =
-          RefreshController(initialRefresh: false);
+      final RefreshState _refreshState = RefreshState();
+      final RefreshController _refreshController = RefreshController();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: SmartRefresher(
@@ -212,6 +218,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
       ));
@@ -220,22 +227,23 @@ void main() {
       await tester.drag(find.byType(Viewport), Offset(0, 100.0),
           touchSlopY: 0.0);
       await tester.pump(); // refresh to canRefresh
-      expect(_refreshController.headerStatus, RefreshStatus.canRefresh);
+      expect(_refreshState.headerStatus, RefreshStatus.canRefresh);
       await tester.pump(Duration(milliseconds: 100));
-      expect(_refreshController.headerStatus, RefreshStatus.refreshing);
+      expect(_refreshState.headerStatus, RefreshStatus.refreshing);
       await tester.drag(find.byType(Viewport), Offset(0, -90.0));
       await tester.pumpAndSettle();
       final double positionRecord = _refreshController.position!.pixels;
-      _refreshController.refreshCompleted();
+      _refreshState.refreshCompleted();
       await tester.pumpAndSettle(Duration(milliseconds: 600));
       expect(_refreshController.position!.pixels == positionRecord - 60.0,
           true); //60.0 is indicator  visual extent
       await tester.pump(Duration(milliseconds: 600));
-      expect(_refreshController.headerStatus, RefreshStatus.idle);
+      expect(_refreshState.headerStatus, RefreshStatus.idle);
     });
   });
 
   testWidgets("verity headerTriggerDistance", (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -252,6 +260,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
         maxOverScrollExtent: 100.0,
@@ -264,21 +273,22 @@ void main() {
     await tester.drag(find.byType(Scrollable), Offset(0, 99.999999999),
         touchSlopY: 0.0);
     await tester.pump();
-    expect(_refreshController.headerStatus, RefreshStatus.idle);
+    expect(_refreshState.headerStatus, RefreshStatus.idle);
     await tester.pumpAndSettle(Duration(milliseconds: 600));
-    expect(_refreshController.headerStatus, RefreshStatus.idle);
+    expect(_refreshState.headerStatus, RefreshStatus.idle);
 
     _refreshController.position!.jumpTo(0.0);
     await tester.pump(Duration(milliseconds: 100));
     await tester.drag(find.byType(Scrollable), Offset(0, 100.999999999),
         touchSlopY: 0.0);
     await tester.pump();
-    expect(_refreshController.headerStatus, RefreshStatus.canRefresh);
+    expect(_refreshState.headerStatus, RefreshStatus.canRefresh);
     await tester.pumpAndSettle(Duration(milliseconds: 200));
-    expect(_refreshController.headerStatus, RefreshStatus.refreshing);
+    expect(_refreshState.headerStatus, RefreshStatus.refreshing);
   });
 
   testWidgets("without refresh function ,only twoLevel", (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -296,6 +306,7 @@ void main() {
             itemCount: 20,
             itemExtent: 100,
           ),
+          state: _refreshState,
           controller: _refreshController,
         ),
         maxOverScrollExtent: 100.0,
@@ -306,16 +317,16 @@ void main() {
         touchSlopY: 0.0);
     await tester.pump();
     expect(_refreshController.position!.pixels, -155.999999999);
-    expect(_refreshController.headerStatus, RefreshStatus.canTwoLevel);
+    expect(_refreshState.headerStatus, RefreshStatus.canTwoLevel);
     await tester.pumpAndSettle();
-    expect(_refreshController.headerStatus, RefreshStatus.twoLeveling);
+    expect(_refreshState.headerStatus, RefreshStatus.twoLeveling);
     _refreshController.twoLevelComplete();
     await tester.pumpAndSettle();
-    expect(_refreshController.headerStatus, RefreshStatus.idle);
+    expect(_refreshState.headerStatus, RefreshStatus.idle);
     await tester.drag(find.byType(Scrollable), Offset(0, 100.999999999),
         touchSlopY: 0.0);
     await tester.pumpAndSettle();
-    expect(_refreshController.headerStatus, RefreshStatus.idle);
+    expect(_refreshState.headerStatus, RefreshStatus.idle);
     expect(_refreshController.position!.pixels, 0.0);
   });
 }

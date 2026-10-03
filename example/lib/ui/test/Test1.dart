@@ -12,6 +12,7 @@ class Test1 extends StatefulWidget {
 
 class Test1State extends State<Test1> {
   late RefreshController _refreshController;
+  late RefreshState _refreshState;
   ScrollController? _scrollController;
   List<Widget> data = [];
 
@@ -40,6 +41,7 @@ class Test1State extends State<Test1> {
   void initState() {
     _getDatas();
     _scrollController = ScrollController(keepScrollOffset: true);
+    _refreshState = RefreshState();
     _refreshController = RefreshController();
     super.initState();
   }
@@ -64,6 +66,7 @@ class Test1State extends State<Test1> {
             ],
         body: Container(
           child: SmartRefresher(
+              state: _refreshState,
               controller: _refreshController,
               enablePullDown: true,
               header: WaterDropHeader(),
@@ -79,7 +82,7 @@ class Test1State extends State<Test1> {
                   ));
                   if (mounted)
                     setState(() {
-                      _refreshController.refreshCompleted();
+                      _refreshState.refreshCompleted();
                     });
                 });
               },
@@ -94,7 +97,7 @@ class Test1State extends State<Test1> {
                           child: Text('Data '),
                         ),
                       ));
-                      _refreshController.loadComplete();
+                      _refreshState.loadComplete();
                     });
                 });
               },
@@ -104,6 +107,13 @@ class Test1State extends State<Test1> {
                 itemBuilder: (context, index) => Item(),
               )),
         ));
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    _refreshState.dispose();
+    super.dispose();
   }
 }
 

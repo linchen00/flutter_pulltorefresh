@@ -27,6 +27,7 @@ const String myUrl =
     "https://avatars1.githubusercontent.com/u/19425362?s=400&u=1a30f9fdf71cc9a51e20729b2fa1410c710d0f2f&v=4";
 
 class _QQChatListState extends State<QQChatList> {
+  RefreshState _refreshState = RefreshState();
   RefreshController _refreshController = RefreshController();
   ScrollController _scrollController = ScrollController();
   TextEditingController _textController = TextEditingController();
@@ -115,7 +116,7 @@ class _QQChatListState extends State<QQChatList> {
                           url:
                               "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1718395925,3485808025&fm=27&gp=0.jpg"));
                       setState(() {});
-                      _refreshController.loadComplete();
+                      _refreshState.loadComplete();
                     },
                     footer: CustomFooter(
                       loadStyle: LoadStyle.ShowAlways,
@@ -152,6 +153,7 @@ class _QQChatListState extends State<QQChatList> {
                         );
                       },
                     ),
+                    state: _refreshState,
                     controller: _refreshController,
                   ),
                 ),
@@ -210,6 +212,13 @@ class _QQChatListState extends State<QQChatList> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }
 

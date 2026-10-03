@@ -13,6 +13,7 @@ import 'test_indicator.dart';
 
 void main() {
   testWidgets("test child attribute ", (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -22,6 +23,7 @@ void main() {
         enablePullUp: true,
         enablePullDown: true,
         child: null,
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -37,6 +39,7 @@ void main() {
           itemExtent: 100.0,
           itemCount: 20,
         ),
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -63,6 +66,7 @@ void main() {
             )
           ],
         ),
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -86,6 +90,7 @@ void main() {
           itemCount: 20,
           controller: scrollController,
         ),
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -95,6 +100,7 @@ void main() {
   });
 
   testWidgets("test smartRefresher builder constructor ", (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -116,12 +122,14 @@ void main() {
             ],
           );
         },
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
   });
 
   testWidgets("param check ", (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -137,6 +145,7 @@ void main() {
           itemCount: 20,
           itemExtent: 100,
         ),
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -157,6 +166,7 @@ void main() {
           itemCount: 20,
           itemExtent: 100,
         ),
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -185,6 +195,7 @@ void main() {
         onLoading: () {
           logs.add("loading");
         },
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -197,7 +208,7 @@ void main() {
     expect(logs.length, 1);
     expect(logs[0], "refresh");
     logs.clear();
-    _refreshController.refreshCompleted();
+    _refreshState.refreshCompleted();
     await tester.pumpAndSettle(Duration(milliseconds: 600));
 
     await tester.drag(find.byType(Scrollable), Offset(0, -4000.0),
@@ -207,7 +218,7 @@ void main() {
     expect(logs.length, 1);
     expect(logs[0], "loading");
     logs.clear();
-    _refreshController.loadComplete();
+    _refreshState.loadComplete();
 
     double count = 1;
     while (count < 11) {
@@ -219,6 +230,7 @@ void main() {
   });
 
   testWidgets(" verity smartRefresher and NestedScrollView", (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     int time = 0;
     await tester.pumpWidget(MaterialApp(
@@ -240,6 +252,7 @@ void main() {
         onLoading: () async {
           time++;
         },
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -247,17 +260,17 @@ void main() {
     // test pull down
     await tester.drag(find.byType(Viewport), const Offset(0, 120));
     await tester.pump();
-    expect(_refreshController.headerStatus, RefreshStatus.canRefresh);
+    expect(_refreshState.headerStatus, RefreshStatus.canRefresh);
     await tester.pumpAndSettle();
-    expect(_refreshController.headerStatus, RefreshStatus.refreshing);
-    _refreshController.refreshCompleted();
+    expect(_refreshState.headerStatus, RefreshStatus.refreshing);
+    _refreshState.refreshCompleted();
     await tester.pumpAndSettle(Duration(milliseconds: 800));
 
     // test flip up
     await tester.fling(find.byType(Viewport), const Offset(0, -1000), 3000);
     await tester.pumpAndSettle();
-    expect(_refreshController.footerStatus, LoadStatus.loading);
-    _refreshController.footerMode!.value = LoadStatus.idle;
+    expect(_refreshState.footerStatus, LoadStatus.loading);
+    _refreshState.footerMode!.value = LoadStatus.idle;
     await tester.pumpAndSettle();
     // test drag up
     _refreshController.position!
@@ -265,11 +278,13 @@ void main() {
     await tester.drag(find.byType(Viewport), const Offset(0, -100));
     await tester.pumpAndSettle();
     expect(_refreshController.position!.extentAfter, 0.0);
-    _refreshController.loadComplete();
+    _refreshState.loadComplete();
     expect(time, 3);
+    await tester.pumpAndSettle();
   });
 
   testWidgets("fronStyle can hittest content when springback", (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
     int time = 0;
     await tester.pumpWidget(MaterialApp(
@@ -297,6 +312,7 @@ void main() {
         onLoading: () async {
           time++;
         },
+        state: _refreshState,
         controller: _refreshController,
       ),
     ));
@@ -304,9 +320,9 @@ void main() {
     // test pull down
     await tester.drag(find.byType(Viewport), const Offset(0, 120));
     await tester.pump();
-    expect(_refreshController.headerStatus, RefreshStatus.canRefresh);
+    expect(_refreshState.headerStatus, RefreshStatus.canRefresh);
     await tester.pump(Duration(milliseconds: 2));
-    expect(_refreshController.headerStatus, RefreshStatus.refreshing);
+    expect(_refreshState.headerStatus, RefreshStatus.refreshing);
     expect(_refreshController.position!.pixels, lessThan(0.0));
     await tester.tapAt(Offset(30, 30));
     expect(time, 1);
@@ -314,6 +330,7 @@ void main() {
 
   testWidgets("test RefreshConfiguration new Constructor valid",
       (tester) async {
+    final RefreshState _refreshState = RefreshState();
     final RefreshController _refreshController = RefreshController();
 
     late BuildContext context2;
@@ -353,6 +370,7 @@ void main() {
                     ),
                     onRefresh: () async {},
                     onLoading: () async {},
+                    state: _refreshState,
                     controller: _refreshController,
                   );
                 },

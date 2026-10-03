@@ -30,6 +30,7 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
     with TickerProviderStateMixin {
   AnimationController? _anicontroller, _scaleController;
   AnimationController? _footerController;
+  RefreshState _refreshState = RefreshState();
   RefreshController _refreshController = RefreshController();
   int count = 20;
   @override
@@ -40,11 +41,11 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
         AnimationController(value: 0.0, vsync: this, upperBound: 1.0);
     _footerController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 2000));
-    _refreshController.headerMode!.addListener(() {
-      if (_refreshController.headerStatus == RefreshStatus.idle) {
+    _refreshState.headerMode!.addListener(() {
+      if (_refreshState.headerStatus == RefreshStatus.idle) {
         _scaleController!.value = 0.0;
         _anicontroller!.reset();
-      } else if (_refreshController.headerStatus == RefreshStatus.refreshing) {
+      } else if (_refreshState.headerStatus == RefreshStatus.refreshing) {
         _anicontroller!.repeat();
       }
     });
@@ -54,6 +55,7 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
   @override
   void dispose() {
     _refreshController.dispose();
+    _refreshState.dispose();
     _scaleController!.dispose();
     _footerController!.dispose();
     _anicontroller!.dispose();
@@ -65,19 +67,20 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
     return Container(
       child: SmartRefresher(
         enablePullUp: true,
+        state: _refreshState,
         controller: _refreshController,
         onRefresh: () async {
           await Future.delayed(Duration(milliseconds: 1000));
           if (!mounted) return;
           setState(() => count = 20);
-          _refreshController.refreshCompleted(resetFooterState: true);
+          _refreshState.refreshCompleted(resetFooterState: true);
         },
         onLoading: () async {
           await Future.delayed(Duration(milliseconds: 1000));
           if (!mounted) return;
           count += 4;
           setState(() {});
-          _refreshController.loadComplete();
+          _refreshState.loadComplete();
         },
         child: ListView.builder(
           itemBuilder: (c, i) => Card(),
@@ -127,8 +130,7 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
         header: CustomHeader(
           refreshStyle: RefreshStyle.Behind,
           onOffsetChange: (offset) {
-            if (_refreshController.headerMode!.value !=
-                RefreshStatus.refreshing)
+            if (_refreshState.headerMode!.value != RefreshStatus.refreshing)
               _scaleController!.value = offset / 80.0;
           },
           builder: (c, m) {

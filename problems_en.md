@@ -10,11 +10,11 @@ Check enablePullDown/enablePullUp, then ensure ListView is the direct child. Wra
 
 ## Why does refreshing/loading never end?
 
-onRefresh/onLoading trigger your work; the component does not await its Future to finish status. Call refreshCompleted/refreshFailed or loadComplete/loadFailed/loadNoData, including on error paths. Check mounted after asynchronous work.
+onRefresh/onLoading trigger your work; the component does not await its Future to finish status. Call RefreshState.refreshCompleted/refreshFailed or RefreshState.loadComplete/loadFailed/loadNoData, including on error paths. Check mounted after asynchronous work.
 
 ## How do I restore loading after refresh?
 
-Call refreshCompleted(resetFooterState: true), or resetNoData() when the footer is noMore. enableLoadingWhenNoData defaults to false. For tap-to-retry, configure footer.onClick to call requestLoading().
+Call state.refreshCompleted(resetFooterState: true), or state.resetNoData() when the footer is noMore. enableLoadingWhenNoData defaults to false. For tap-to-retry, configure footer.onClick to call requestLoading().
 
 ## How do I hide or position a short-list footer?
 
@@ -44,6 +44,6 @@ The rebuilt CustomScrollView does not retain automatic BoxScrollView system padd
 
 Validate your structure. The library listens to ScrollPosition and applies RefreshPhysics; special scrollables may have different activity, boundary and Viewport assumptions. See [notes](notice_en.md) and the [NestedScrollView example](example/lib/ui/example/useStage/Nested.dart).
 
-## Why does needCallback: false still call my callback?
+## How do state updates and business callbacks differ?
 
-Currently only the needMove: true branch handles needCallback. With needMove: false, status listeners and business callbacks still run; see [API](propertys_en.md#refreshcontroller).
+state.startRefresh/startLoading and notifier.value assignments update indicators without calling onRefresh/onLoading. Gestures and controller requests trigger business callbacks. needCallback: false suppresses those callbacks in both needMove branches while preserving state notifications and indicator hooks; see [API](propertys_en.md#refreshcontroller).

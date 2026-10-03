@@ -43,7 +43,7 @@ class NestedRefreshState extends State<NestedRefresh>
   @override
   void initState() {
     _getDatas();
-    _refreshController = RefreshController(initialRefresh: true);
+    _refreshController = RefreshController();
     super.initState();
   }
 
@@ -93,6 +93,12 @@ class NestedRefreshState extends State<NestedRefresh>
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
 }
 
 class RefreshListView extends StatefulWidget {
@@ -104,15 +110,15 @@ class RefreshListView extends StatefulWidget {
 
 class _RefreshListViewState extends State<RefreshListView> {
   List<String> items = ["1", "2", "3", "4", "5", "6", "7", "8"];
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: true);
+  RefreshState _refreshState = RefreshState();
+  RefreshController _refreshController = RefreshController();
 
   void _onRefresh() async {
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
     if (!mounted) return;
     setState(() => items = List.generate(8, (index) => "${index + 1}"));
-    _refreshController.refreshCompleted(resetFooterState: true);
+    _refreshState.refreshCompleted(resetFooterState: true);
   }
 
   void _onLoading() async {
@@ -122,7 +128,7 @@ class _RefreshListViewState extends State<RefreshListView> {
     // if failed,use loadFailed(),if no data return,use LoadNodata()
     items.add((items.length + 1).toString());
     if (mounted) setState(() {});
-    _refreshController.loadComplete();
+    _refreshState.loadComplete();
   }
 
   @override
@@ -151,6 +157,8 @@ class _RefreshListViewState extends State<RefreshListView> {
           );
         },
       ),
+      state: _refreshState,
+      initialRefresh: true,
       controller: _refreshController,
       onRefresh: _onRefresh,
       onLoading: _onLoading,
@@ -167,6 +175,7 @@ class _RefreshListViewState extends State<RefreshListView> {
   @override
   void dispose() {
     _refreshController.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 }

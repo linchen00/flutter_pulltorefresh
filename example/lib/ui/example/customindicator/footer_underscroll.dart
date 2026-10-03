@@ -19,6 +19,7 @@ class ConvertFooter extends StatefulWidget {
 }
 
 class _ConvertFooterState extends State<ConvertFooter> {
+  RefreshState _refreshState = RefreshState();
   RefreshController _refreshController = RefreshController();
 
   List<String> data = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
@@ -65,12 +66,20 @@ class _ConvertFooterState extends State<ConvertFooter> {
                 data.add("${_nextItem++}");
               }
             });
-            _refreshController.loadComplete();
+            _refreshState.loadComplete();
           },
+          state: _refreshState,
           controller: _refreshController,
         ),
       ),
       appBar: AppBar(),
     );
+  }
+
+  @override
+  void dispose() {
+    _refreshState.dispose();
+    _refreshController.dispose();
+    super.dispose();
   }
 }

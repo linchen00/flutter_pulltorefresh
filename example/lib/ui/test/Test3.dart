@@ -14,6 +14,7 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
   ValueNotifier<double> topOffsetLis = ValueNotifier(0.0);
   ValueNotifier<double> bottomOffsetLis = ValueNotifier(0.0);
   late RefreshController _refreshController;
+  late RefreshState _refreshState;
 
   List<Widget> data = [];
 
@@ -24,10 +25,10 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
             onPressed: () {
               _refreshController
                   .requestRefresh(needCallback: false)
-                  ?.then((value) async {
+                  .then((value) async {
                 print("requestRefresh");
                 await Future.delayed(const Duration(milliseconds: 5000));
-                _refreshController.refreshCompleted();
+                _refreshState.refreshCompleted();
               });
             },
             child: Text("请求刷新")),
@@ -35,10 +36,10 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
             onPressed: () {
               _refreshController
                   .requestLoading(needCallback: false)
-                  ?.then((value) async {
+                  .then((value) async {
                 print("requestLoading");
                 await Future.delayed(const Duration(milliseconds: 5000));
-                _refreshController.loadComplete();
+                _refreshState.loadComplete();
               });
             },
             child: Text("请求加载数据"))
@@ -70,13 +71,15 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
   @override
   void initState() {
     _getDatas();
-    _refreshController = RefreshController(
-        initialRefresh: false, initialLoadStatus: LoadStatus.noMore);
+    _refreshState = RefreshState(initialLoadStatus: LoadStatus.noMore);
+    _refreshController = RefreshController();
     super.initState();
   }
 
   @override
   void dispose() {
+    _refreshController.dispose();
+    _refreshState.dispose();
     super.dispose();
   }
 
@@ -95,6 +98,7 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
       child: SmartRefresher(
         enablePullUp: true,
         enablePullDown: true,
+        state: _refreshState,
         controller: _refreshController,
         footer: ClassicFooter(
           height: 60,
@@ -118,7 +122,7 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
             height: 100.0,
           ));
           if (mounted) setState(() {});
-          _refreshController.refreshCompleted();
+          _refreshState.refreshCompleted();
         },
         child: CustomScrollView(
           slivers: <Widget>[
@@ -131,7 +135,7 @@ class Test3State extends State<Test3> with TickerProviderStateMixin {
         onLoading: () async {
           await Future.delayed(const Duration(milliseconds: 1000));
           print("onLoading");
-          _refreshController.loadNoData();
+          _refreshState.loadNoData();
         },
       ),
       dragSpeedRatio: 0.9,

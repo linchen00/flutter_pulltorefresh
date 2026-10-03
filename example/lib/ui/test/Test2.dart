@@ -13,6 +13,7 @@ class Test2 extends StatefulWidget {
 
 class _Test2State extends State<Test2> with TickerProviderStateMixin {
   late RefreshController _controller;
+  late RefreshState _state;
   int indexPage = 0;
   List<String?> data = [];
 
@@ -28,17 +29,17 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
         data.add(item["url"]);
       }
       if (mounted) setState(() {});
-      _controller.loadFailed();
+      _state.loadFailed();
       indexPage++;
     }).catchError((_) {
       print("error");
-      _controller.loadComplete();
+      _state.loadComplete();
     });
   }
 
   void _onRefresh() {
     Future.delayed(const Duration(milliseconds: 2009)).then((val) {
-      _controller.refreshCompleted();
+      _state.refreshCompleted();
     });
   }
 
@@ -55,7 +56,7 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
       ),
       onTap: () {
         print("tap");
-        _controller.requestRefresh(needMove: false)?.then((_) {
+        _controller.requestRefresh(needMove: false).then((_) {
           print("request complete");
         });
       },
@@ -65,7 +66,8 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _controller = RefreshController(initialLoadStatus: LoadStatus.failed);
+    _state = RefreshState(initialLoadStatus: LoadStatus.failed);
+    _controller = RefreshController();
     _fetch();
   }
 
@@ -79,6 +81,7 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
     return SmartRefresher(
       enablePullDown: true,
       enablePullUp: true,
+      state: _state,
       controller: _controller,
       onRefresh: _onRefresh,
       header: MaterialClassicHeader(),
@@ -91,6 +94,13 @@ class _Test2State extends State<Test2> with TickerProviderStateMixin {
         itemBuilder: buildImage,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _state.dispose();
+    super.dispose();
   }
 }
 

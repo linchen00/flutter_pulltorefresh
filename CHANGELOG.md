@@ -1,3 +1,11 @@
+## Unreleased
+
+* Breaking: require an externally owned RefreshState in SmartRefresher and SmartRefresher.builder; RefreshController is optional.
+* Move status fields, queries, completion/failure/reset methods and initial status parameters from RefreshController to RefreshState. Move initialRefresh to SmartRefresher.
+* Add synchronous startRefresh/startLoading for UI-independent state use. State notifications update indicators without invoking business callbacks.
+* Keep requestRefresh, requestLoading, requestTwoLevel and twoLevelComplete on RefreshController, with Future<void> returns and consistent needCallback behavior.
+* Preserve state across mounting and controller replacement; invalidate stale UI operations after replacement, detachment or disposal.
+
 ## 2.0.0
 ### Breaking Changes:
 * Remove onOffsetChange in SmartRefresher,autoLoad in RefreshConfiguration,scrollController in RefreshController
