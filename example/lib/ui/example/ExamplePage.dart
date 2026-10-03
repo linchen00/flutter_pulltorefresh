@@ -12,6 +12,7 @@ import 'package:example/ui/example/otherwidget/refresh_animatedlist_example.dart
 import 'package:example/ui/example/otherwidget/refresh_pageView_example.dart';
 import 'package:example/ui/example/useStage/Nested.dart';
 import 'package:example/ui/example/useStage/basic.dart';
+import 'package:example/ui/example/useStage/state_refresh.dart';
 import 'package:example/ui/example/useStage/empty_view.dart';
 import 'package:example/ui/example/useStage/force_full_one_page.dart';
 import 'package:example/ui/example/useStage/hidefooter_bycontent.dart';
@@ -76,6 +77,13 @@ class _ExamplePageState extends State<ExamplePage>
   @override
   Widget build(BuildContext context) {
     final List<ExampleItem> items1 = [
+      ExampleItem(
+          title: "State 驱动刷新与状态核对",
+          onClick: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return StateRefreshExample();
+            }));
+          }),
       ExampleItem(
           title: "基础用法",
           onClick: () {

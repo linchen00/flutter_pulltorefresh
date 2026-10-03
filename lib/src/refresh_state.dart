@@ -50,6 +50,11 @@ enum LoadStatus {
 
 /// Refresh and loading state that can be used without a mounted UI.
 /// The caller owns and disposes this object.
+///
+/// Mounted indicators listen to both notifiers and render their current values,
+/// including values set before mounting. State changes do not request scrolling
+/// or invoke business callbacks. A mounted header handles completion animations
+/// and returns completed or failed refreshes to idle when it retracts.
 class RefreshState {
   RefreshNotifier<RefreshStatus>? headerMode;
   RefreshNotifier<LoadStatus>? footerMode;

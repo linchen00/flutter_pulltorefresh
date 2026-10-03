@@ -111,11 +111,21 @@ class RenderSliverRefresh extends RenderSliverSingleBoxAdapter {
     markNeedsLayout();
   }
 
-  // This keeps track of the previously applied scroll offsets to the scrollable
-  // so that when [refreshIndicatorLayoutExtent] or [hasLayoutExtent] changes,
-  // the appropriate delta can be applied to keep everything in the same place
-  // visually.
-  double layoutExtentOffsetCompensation = 0.0;
+  double _previousLayoutExtent = 0.0;
+
+  // Preserve the body anchor during overscroll or body scrolling, and the
+  // relative position inside the header while the viewport displays it.
+  // A collapsed header's leading edge maps to the expanded header's leading
+  // edge, so publishing refreshing at rest reveals it without scrolling.
+  double _scrollOffsetCorrection(double layoutExtent) {
+    final pixels = (parent as RenderViewportBase).offset.pixels;
+    final delta = layoutExtent - _previousLayoutExtent;
+    if (pixels < 0.0 || pixels > _previousLayoutExtent) return delta;
+
+    final headerFraction =
+        _previousLayoutExtent > 0.0 ? pixels / _previousLayoutExtent : 0.0;
+    return headerFraction * layoutExtent - pixels;
+  }
 
   @override
   void performResize() {
@@ -185,17 +195,16 @@ class RenderSliverRefresh extends RenderSliverSingleBoxAdapter {
     // The new layout extent this sliver should now have.
     final double layoutExtent =
         (_hasLayoutExtent ? 1.0 : 0.0) * _refreshIndicatorExtent;
-    // If the new layoutExtent instructive changed, the SliverGeometry's
-    // layoutExtent will take that value (on the next performLayout run). Shift
-    // the scroll offset first so it doesn't make the scroll position suddenly jump.
+    // Map the current viewport anchor into the new header/body coordinates
+    // before laying out either region. Front headers do not occupy scroll space.
     if (refreshStyle != RefreshStyle.Front) {
-      if (layoutExtent != layoutExtentOffsetCompensation) {
-        geometry = SliverGeometry(
-          scrollOffsetCorrection: layoutExtent - layoutExtentOffsetCompensation,
-        );
-
-        layoutExtentOffsetCompensation = layoutExtent;
-        return;
+      if (layoutExtent != _previousLayoutExtent) {
+        final correction = _scrollOffsetCorrection(layoutExtent);
+        _previousLayoutExtent = layoutExtent;
+        if (correction != 0.0) {
+          geometry = SliverGeometry(scrollOffsetCorrection: correction);
+          return;
+        }
       }
     }
     bool active = constraints.overlap < 0.0 || layoutExtent > 0.0;
