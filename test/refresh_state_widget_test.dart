@@ -21,12 +21,13 @@ Widget buildStateRefresher(
   bool enablePullUp = true,
   bool enableTwoLevel = false,
   bool initialRefresh = false,
+  bool hideFooterWhenNotFull = false,
   bool builder = false,
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
   int count = 20,
-  Widget header = const TestHeader(),
-  Widget footer = const TestFooter(),
+  RefreshIndicator header = const TestHeader(),
+  LoadIndicator footer = const TestFooter(),
 }) {
   final child = builder
       ? SmartRefresher.builder(
@@ -76,7 +77,9 @@ Widget buildStateRefresher(
   return Directionality(
       textDirection: TextDirection.ltr,
       child: RefreshConfiguration(
-          maxOverScrollExtent: enableTwoLevel ? 180 : null, child: child));
+          maxOverScrollExtent: enableTwoLevel ? 180 : null,
+          hideFooterWhenNotFull: hideFooterWhenNotFull,
+          child: child));
 }
 
 void main() {

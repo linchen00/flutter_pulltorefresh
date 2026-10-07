@@ -23,7 +23,8 @@ typedef void OnTwoLevel(bool isOpen);
 typedef bool ShouldFollowContent(LoadStatus? status);
 
 /// global default indicator builder
-typedef IndicatorBuilder = Widget Function();
+typedef RefreshIndicatorBuilder = RefreshIndicator Function();
+typedef LoadIndicatorBuilder = LoadIndicator Function();
 
 /// a builder for attaching refresh function with the physics
 typedef Widget RefresherBuilder(BuildContext context, RefreshPhysics physics);
@@ -79,9 +80,8 @@ class SmartRefresher extends StatefulWidget {
   /// If reverse is true,header displace at the bottom of content.
   /// if scrollDirection = Axis.horizontal,it will display at left or right
   ///
-  /// from 1.5.2,it has been change RefreshIndicator to Widget,but remember only pass sliver widget,
-  /// if you pass not a sliver,it will throw error
-  final Widget? header;
+  /// Provide a complete refresh indicator. Use CustomHeader for ordinary content.
+  final RefreshIndicator? header;
 
   /// footer indicator display after content
   ///
@@ -89,9 +89,8 @@ class SmartRefresher extends StatefulWidget {
   /// If reverse is false,header displace at the bottom of content.
   /// if scrollDirection = Axis.horizontal,it will display at left or right
   ///
-  /// from 1.5.2,it has been change LoadIndicator to Widget,but remember only pass sliver widget,
-  //  if you pass not a sliver,it will throw error
-  final Widget? footer;
+  /// Provide a complete load indicator. Use CustomFooter for ordinary content.
+  final LoadIndicator? footer;
   // This bool will affect whether or not to have the function of drop-up load.
   final bool enablePullUp;
 
@@ -504,6 +503,9 @@ class SmartRefresherState extends State<SmartRefresher> {
     return result;
   }
 
+  bool isRequestingIndicator(bool refresh) =>
+      _requests.contains(refresh ? 'refresh' : 'loading');
+
   Future<void> requestRefresh({
     bool needMove = true,
     bool needCallback = true,
@@ -544,25 +546,47 @@ class SmartRefresherState extends State<SmartRefresher> {
     final version = _bindingVersion;
     var changed = false;
     var published = false;
+    var publishing = false;
+    var userInterrupted = false;
+    var requestPosition = position;
+    void listenPosition() {
+      if (requestPosition.activity is DragScrollActivity)
+        userInterrupted = true;
+    }
+
     void listen() {
-      changed = true;
+      // Only the transition owned by this request may change its notifier.
+      // A synchronous mode hook can still cancel it with another transition.
+      final active = refresh ? state.isRefresh : state.isLoading;
+      if (!publishing || !active) changed = true;
     }
 
     notifier.addListener(listen);
+    position.addListener(listenPosition);
     _requests.add(name);
     indicator.floating = true;
     indicator.update();
     if (needMove) setCanDrag(false);
     try {
       if (needMove) {
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-        if (!_isCurrent(version, state) || changed || !element.state.mounted)
-          return;
+        await WidgetsBinding.instance.endOfFrame;
+        if (!_isCurrent(version, state) ||
+            changed ||
+            userInterrupted ||
+            !element.state.mounted) return;
         final currentPosition = _position;
         if (currentPosition == null) return;
+        if (!identical(requestPosition, currentPosition)) {
+          requestPosition.removeListener(listenPosition);
+          requestPosition = currentPosition;
+          requestPosition.addListener(listenPosition);
+        }
+        if (indicator.indicatorLayout == null) {
+          throw StateError('The requested indicator has not completed layout.');
+        }
         await currentPosition.animateTo(
           refresh
-              ? currentPosition.minScrollExtent - 0.0001
+              ? currentPosition.minScrollExtent
               : currentPosition.maxScrollExtent,
           duration: duration,
           curve: curve,
@@ -570,21 +594,51 @@ class SmartRefresherState extends State<SmartRefresher> {
       } else {
         await Future<void>.value();
       }
-      if (!_isCurrent(version, state) || changed || !element.state.mounted)
-        return;
+      if (!_isCurrent(version, state) ||
+          changed ||
+          userInterrupted ||
+          !element.state.mounted) return;
       if (!identical(notifier, refresh ? state.headerMode : state.footerMode))
         return;
       published = true;
+      publishing = true;
       if (refresh) {
         state.startRefresh();
       } else {
         state.startLoading();
       }
+      publishing = false;
+      if (needMove) {
+        // Active content may have a different extent from the content used
+        // during the reveal animation. Commit that layout before invoking the
+        // business callback, which may complete the operation or add items.
+        await WidgetsBinding.instance.endOfFrame;
+        if (!_isCurrent(version, state) ||
+            changed ||
+            userInterrupted ||
+            !element.state.mounted) return;
+        final currentPosition = _position;
+        if (currentPosition == null) return;
+        if (!identical(requestPosition, currentPosition)) {
+          requestPosition.removeListener(listenPosition);
+          requestPosition = currentPosition;
+          requestPosition.addListener(listenPosition);
+        }
+        if (indicator.indicatorLayout == null) {
+          throw StateError('The requested indicator has not completed layout.');
+        }
+        final target = refresh
+            ? currentPosition.minScrollExtent
+            : currentPosition.maxScrollExtent;
+        if (currentPosition.pixels != target) currentPosition.jumpTo(target);
+      }
+      if (changed || userInterrupted || !element.state.mounted) return;
       if (needCallback && _isCurrent(version, state)) {
         (refresh ? widget.onRefresh : widget.onLoading)?.call();
       }
     } finally {
       notifier.removeListener(listen);
+      requestPosition.removeListener(listenPosition);
       if (_isCurrent(version, state)) {
         _requests.remove(name);
         if (needMove) setCanDrag(true);
@@ -878,10 +932,10 @@ class RefreshConfiguration extends InheritedWidget {
   final Widget child;
 
   /// global default header builder
-  final IndicatorBuilder? headerBuilder;
+  final RefreshIndicatorBuilder? headerBuilder;
 
   /// global default footer builder
-  final IndicatorBuilder? footerBuilder;
+  final LoadIndicatorBuilder? footerBuilder;
 
   /// custom spring animate
   final SpringDescription springDescription;
@@ -928,7 +982,7 @@ class RefreshConfiguration extends InheritedWidget {
   /// the speed ratio when dragging overscroll ,compute=origin physics dragging speed *dragSpeedRatio
   final double dragSpeedRatio;
 
-  /// max overScroll distance when out of edge
+  /// Additional overscroll budget beyond the header display/trigger extent.
   final double? maxOverScrollExtent;
 
   /// 	max underScroll distance when out of edge
@@ -976,7 +1030,12 @@ class RefreshConfiguration extends InheritedWidget {
       this.enableLoadMoreVibrate = false,
       this.topHitBoundary,
       this.bottomHitBoundary})
-      : assert(headerTriggerDistance > 0),
+      : assert(headerTriggerDistance > 0 &&
+            headerTriggerDistance < double.infinity),
+        assert(footerTriggerDistance > double.negativeInfinity &&
+            footerTriggerDistance < double.infinity),
+        assert(maxOverScrollExtent == null || maxOverScrollExtent >= 0),
+        assert(maxUnderScrollExtent == null || maxUnderScrollExtent >= 0),
         assert(twiceTriggerDistance > 0),
         assert(closeTwoLevelDistance > 0),
         assert(dragSpeedRatio > 0),
@@ -990,8 +1049,8 @@ class RefreshConfiguration extends InheritedWidget {
     Key? key,
     required BuildContext context,
     required this.child,
-    IndicatorBuilder? headerBuilder,
-    IndicatorBuilder? footerBuilder,
+    RefreshIndicatorBuilder? headerBuilder,
+    LoadIndicatorBuilder? footerBuilder,
     double? dragSpeedRatio,
     ShouldFollowContent? shouldFooterFollowWhenNotFull,
     bool? enableScrollWhenTwoLevel,

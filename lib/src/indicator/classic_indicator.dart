@@ -83,6 +83,14 @@ class ClassicHeader extends RefreshIndicator {
           height: height,
         );
 
+  /// Wraps the classic content while retaining one refresh lifecycle.
+  @protected
+  Widget wrapContent(BuildContext context, Widget child, RefreshStatus? mode) {
+    return outerBuilder != null
+        ? outerBuilder!(child)
+        : Container(height: height, child: Center(child: child));
+  }
+
   @override
   State createState() {
     return _ClassicHeaderState();
@@ -166,12 +174,7 @@ class _ClassicHeaderState extends RefreshIndicatorState<ClassicHeader> {
       alignment: WrapAlignment.center,
       children: children,
     );
-    return widget.outerBuilder != null
-        ? widget.outerBuilder!(container)
-        : Container(
-            child: Center(child: container),
-            height: widget.height,
-          );
+    return widget.wrapContent(context, container, mode);
   }
 }
 
@@ -237,7 +240,6 @@ class ClassicFooter extends LoadIndicator {
 
   @override
   State<StatefulWidget> createState() {
-
     return _ClassicFooterState();
   }
 }

@@ -4,7 +4,7 @@
  * Time:  2019-08-29 09:41
  */
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RefreshIndicator;
 import 'classic_indicator.dart';
 import '../smart_refresher.dart';
 
@@ -52,120 +52,78 @@ enum TwoLevelDisplayAlignment { fromTop, fromCenter, fromBottom }
 ///);
 ///
 /// ```
-class TwoLevelHeader extends StatelessWidget {
-  /// this  attr mostly put image or color
+class TwoLevelHeader extends ClassicHeader {
   final BoxDecoration? decoration;
-
-  /// the content in TwoLevel,display in (twoLevelOpening,closing,TwoLeveling state)
   final Widget? twoLevelWidget;
-
-  /// fromTop use with RefreshStyle.Behind,from bottom use with Follow Style
   final TwoLevelDisplayAlignment displayAlignment;
-  // the following is the same with ClassicHeader
-  final String? releaseText,
-      idleText,
-      refreshingText,
-      completeText,
-      failedText,
-      canTwoLevelText;
 
-  final Widget? releaseIcon,
-      idleIcon,
-      refreshingIcon,
-      completeIcon,
-      failedIcon,
-      canTwoLevelIcon;
-
-  /// icon and text middle margin
-  final double spacing;
-  final IconPosition iconPos;
-
-  final TextStyle textStyle;
-
-  final double height;
-  final Duration completeDuration;
-
-  const TwoLevelHeader(
-      {Key? key,
-      this.height = 80.0,
-      this.decoration,
-      this.displayAlignment = TwoLevelDisplayAlignment.fromBottom,
-      this.completeDuration = const Duration(milliseconds: 600),
-      this.textStyle = const TextStyle(color: const Color(0xff555555)),
-      this.releaseText,
-      this.refreshingText,
-      this.canTwoLevelIcon,
-      this.canTwoLevelText,
-      this.completeText,
-      this.failedText,
-      this.idleText,
-      this.iconPos = IconPosition.left,
-      this.spacing = 15.0,
-      this.refreshingIcon,
-      this.failedIcon = const Icon(Icons.error, color: Colors.grey),
-      this.completeIcon = const Icon(Icons.done, color: Colors.grey),
-      this.idleIcon = const Icon(Icons.arrow_downward, color: Colors.grey),
-      this.releaseIcon = const Icon(Icons.refresh, color: Colors.grey),
-      this.twoLevelWidget});
+  const TwoLevelHeader({
+    Key? key,
+    double height = 80.0,
+    this.decoration,
+    this.twoLevelWidget,
+    this.displayAlignment = TwoLevelDisplayAlignment.fromBottom,
+    Duration completeDuration = const Duration(milliseconds: 600),
+    TextStyle textStyle = const TextStyle(color: Color(0xff555555)),
+    String? releaseText,
+    refreshingText,
+    canTwoLevelText,
+    completeText,
+    failedText,
+    idleText,
+    Widget? canTwoLevelIcon,
+    refreshingIcon,
+    Widget? failedIcon = const Icon(Icons.error, color: Colors.grey),
+    Widget? completeIcon = const Icon(Icons.done, color: Colors.grey),
+    Widget? idleIcon = const Icon(Icons.arrow_downward, color: Colors.grey),
+    Widget? releaseIcon = const Icon(Icons.refresh, color: Colors.grey),
+    IconPosition iconPos = IconPosition.left,
+    double spacing = 15.0,
+  }) : super(
+          key: key,
+          height: height,
+          completeDuration: completeDuration,
+          refreshStyle: displayAlignment == TwoLevelDisplayAlignment.fromBottom
+              ? RefreshStyle.Follow
+              : RefreshStyle.Behind,
+          textStyle: textStyle,
+          releaseText: releaseText,
+          refreshingText: refreshingText,
+          canTwoLevelText: canTwoLevelText,
+          completeText: completeText,
+          failedText: failedText,
+          idleText: idleText,
+          canTwoLevelIcon: canTwoLevelIcon,
+          refreshingIcon: refreshingIcon,
+          failedIcon: failedIcon,
+          completeIcon: completeIcon,
+          idleIcon: idleIcon,
+          releaseIcon: releaseIcon,
+          iconPos: iconPos,
+          spacing: spacing,
+        );
 
   @override
-  Widget build(BuildContext context) {
-    return ClassicHeader(
-      refreshStyle: displayAlignment == TwoLevelDisplayAlignment.fromBottom
-          ? RefreshStyle.Follow
-          : RefreshStyle.Behind,
-      height: height,
-      refreshingIcon: refreshingIcon,
-      refreshingText: refreshingText,
-      releaseIcon: releaseIcon,
-      releaseText: releaseText,
-      completeDuration: completeDuration,
-      canTwoLevelIcon: canTwoLevelIcon,
-      canTwoLevelText: canTwoLevelText,
-      failedIcon: failedIcon,
-      failedText: failedText,
-      idleIcon: idleIcon,
-      idleText: idleText,
-      completeIcon: completeIcon,
-      completeText: completeText,
-      spacing: spacing,
-      textStyle: textStyle,
-      iconPos: iconPos,
-      outerBuilder: (child) {
-        final RefreshStatus? mode =
-            SmartRefresher.of(context)!.state.headerStatus;
-        final bool isTwoLevel = (mode == RefreshStatus.twoLevelClosing ||
-            mode == RefreshStatus.twoLeveling ||
-            mode == RefreshStatus.twoLevelOpening);
-        if (displayAlignment == TwoLevelDisplayAlignment.fromBottom) {
-          return Container(
-            decoration: !isTwoLevel
-                ? (decoration ?? BoxDecoration(color: Colors.redAccent))
-                : null,
-            height: SmartRefresher.ofState(context)!.viewportExtent,
-            alignment: isTwoLevel ? null : Alignment.bottomCenter,
-            child: isTwoLevel
-                ? twoLevelWidget
-                : Padding(
-                    child: child,
-                    padding: EdgeInsets.only(bottom: 15),
-                  ),
-          );
-        } else {
-          return Container(
-            child: isTwoLevel
-                ? twoLevelWidget
-                : Container(
-                    decoration: !isTwoLevel
-                        ? (decoration ?? BoxDecoration(color: Colors.redAccent))
-                        : null,
-                    alignment: Alignment.bottomCenter,
-                    child: child,
-                    padding: EdgeInsets.only(bottom: 15),
-                  ),
-          );
-        }
-      },
+  Widget wrapContent(BuildContext context, Widget child, RefreshStatus? mode) {
+    final isTwoLevel = mode == RefreshStatus.twoLevelClosing ||
+        mode == RefreshStatus.twoLeveling ||
+        mode == RefreshStatus.twoLevelOpening;
+    return Container(
+      height:
+          isTwoLevel ? SmartRefresher.ofState(context)!.viewportExtent : height,
+      decoration: isTwoLevel
+          ? null
+          : decoration ?? const BoxDecoration(color: Colors.redAccent),
+      alignment: isTwoLevel
+          ? null
+          : displayAlignment == TwoLevelDisplayAlignment.fromTop
+              ? Alignment.topCenter
+              : displayAlignment == TwoLevelDisplayAlignment.fromCenter
+                  ? Alignment.center
+                  : Alignment.bottomCenter,
+      child: isTwoLevel
+          ? twoLevelWidget
+          : Padding(padding: const EdgeInsets.only(bottom: 15), child: child),
     );
   }
 }

@@ -127,7 +127,34 @@ class _BezierHeaderState extends RefreshIndicatorState<BezierHeader>
 
   @override
   Widget buildContent(BuildContext context, RefreshStatus? mode) {
+    return _BezierContent(
+      header: widget,
+      mode: mode,
+      bounce: _beizerBounceCtl,
+      dismiss: _bezierDismissCtl,
+      child: widget.child,
+    );
+  }
+}
 
+/// Shares the Bezier presentation without adding an indicator state hook.
+class _BezierContent extends StatelessWidget {
+  const _BezierContent({
+    required this.header,
+    required this.mode,
+    required this.bounce,
+    required this.dismiss,
+    required this.child,
+  });
+
+  final BezierHeader header;
+  final RefreshStatus? mode;
+  final AnimationController bounce;
+  final AnimationController dismiss;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
       builder: (_, __) {
         return Stack(
@@ -138,49 +165,47 @@ class _BezierHeaderState extends RefreshIndicatorState<BezierHeader>
                   return ClipPath(
                     child: ClipPath(
                       child: Container(
-                        height: widget.rectHeight + 30,
-                        color: widget.bezierColor ??
+                        height: header.rectHeight + 30,
+                        color: header.bezierColor ??
                             Theme.of(context).primaryColor,
                       ),
                       clipper: _BezierPainter(
-                          value: _beizerBounceCtl.value,
-                          startOffsetY: widget.rectHeight),
+                          value: bounce.value, startOffsetY: header.rectHeight),
                     ),
                     clipper: _BezierDismissPainter(
-                        value: _bezierDismissCtl.value,
-                        dismissType: widget.dismissType),
+                        value: dismiss.value, dismissType: header.dismissType),
                   );
                 },
-                animation: _bezierDismissCtl,
+                animation: dismiss,
               ),
               bottom: -50,
               top: 0,
               left: 0,
               right: 0,
             ),
-            !widget.enableChildOverflow
+            !header.enableChildOverflow
                 ? ClipRect(
                     child: Container(
-                      height: (_beizerBounceCtl.isAnimating ||
+                      height: (bounce.isAnimating ||
                                   mode == RefreshStatus.refreshing
                               ? 0
-                              : math.max(0, _beizerBounceCtl.value)) +
-                          widget.rectHeight,
-                      child: widget.child,
+                              : math.max(0, bounce.value)) +
+                          header.rectHeight,
+                      child: child,
                     ),
                   )
                 : Container(
-                    height: (_beizerBounceCtl.isAnimating ||
-                                mode == RefreshStatus.refreshing
-                            ? 0
-                            : math.max(0, _beizerBounceCtl.value)) +
-                        widget.rectHeight,
-                    child: widget.child,
+                    height:
+                        (bounce.isAnimating || mode == RefreshStatus.refreshing
+                                ? 0
+                                : math.max(0, bounce.value)) +
+                            header.rectHeight,
+                    child: child,
                   ),
           ],
         );
       },
-      animation: _beizerBounceCtl,
+      animation: bounce,
     );
   }
 }
@@ -272,29 +297,27 @@ class _BezierPainter extends CustomClipper<Path> {
 ///circleType: BezierCircleType.Raidal,
 ///)
 ///```
-class BezierCircleHeader extends StatefulWidget {
-  final Color? bezierColor;
+class BezierCircleHeader extends BezierHeader {
   // two style:radial or progress
   final BezierCircleType circleType;
-
-  final double rectHeight;
 
   final Color circleColor;
 
   final double circleRadius;
 
-  final bool enableChildOverflow;
-
-  final BezierDismissType dismissType;
-
   BezierCircleHeader(
-      {this.bezierColor,
-      this.rectHeight = 70,
+      {Color? bezierColor,
+      double rectHeight = 70,
       this.circleColor = Colors.white,
-      this.enableChildOverflow = false,
-      this.dismissType = BezierDismissType.RectSpread,
+      bool enableChildOverflow = false,
+      BezierDismissType dismissType = BezierDismissType.RectSpread,
       this.circleType = BezierCircleType.Progress,
-      this.circleRadius = 12});
+      this.circleRadius = 12})
+      : super(
+            bezierColor: bezierColor,
+            rectHeight: rectHeight,
+            enableChildOverflow: enableChildOverflow,
+            dismissType: dismissType);
 
   @override
   State<StatefulWidget> createState() {
@@ -302,9 +325,8 @@ class BezierCircleHeader extends StatefulWidget {
   }
 }
 
-class _BezierCircleHeaderState extends State<BezierCircleHeader>
-    with TickerProviderStateMixin {
-  RefreshStatus mode = RefreshStatus.idle;
+class _BezierCircleHeaderState extends _BezierHeaderState {
+  BezierCircleHeader get circleWidget => widget as BezierCircleHeader;
   late AnimationController _childMoveCtl;
   late Tween<Alignment> _childMoveTween;
   late AnimationController _dismissCtrl;
@@ -317,8 +339,8 @@ class _BezierCircleHeaderState extends State<BezierCircleHeader>
     _childMoveCtl = AnimationController(vsync: this);
     _radialCtrl =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-    _childMoveTween = AlignmentTween(
-        begin: Alignment.bottomCenter, end: Alignment.center);
+    _childMoveTween =
+        AlignmentTween(begin: Alignment.bottomCenter, end: Alignment.center);
     _disMissTween =
         Tween<Offset>(begin: Offset(0.0, 0.0), end: Offset(0.0, 1.5));
     super.initState();
@@ -333,43 +355,56 @@ class _BezierCircleHeaderState extends State<BezierCircleHeader>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return BezierHeader(
-      bezierColor: widget.bezierColor,
-      rectHeight: widget.rectHeight,
-      dismissType: widget.dismissType,
-      enableChildOverflow: widget.enableChildOverflow,
-      readyRefresh: () async {
-        await _childMoveCtl.animateTo(1.0,
-            duration: Duration(milliseconds: 300));
-      },
-      onResetValue: () {
-        _dismissCtrl.value = 0;
-        _childMoveCtl.reset();
-      },
-      onModeChange: (m) {
-        mode = m;
-        if (m == RefreshStatus.refreshing)
-          _radialCtrl.repeat(period: Duration(milliseconds: 500));
-        setState(() {});
-      },
-      endRefresh: () async {
-        _radialCtrl.reset();
-        await _dismissCtrl.animateTo(1, duration: Duration(milliseconds: 550));
-      },
+  Future<void> readyToRefresh() async {
+    await super.readyToRefresh();
+    await _childMoveCtl.animateTo(1.0,
+        duration: const Duration(milliseconds: 300));
+  }
+
+  @override
+  void resetValue() {
+    _dismissCtrl.value = 0;
+    _childMoveCtl.reset();
+    super.resetValue();
+  }
+
+  @override
+  void onModeChange(RefreshStatus? mode) {
+    super.onModeChange(mode);
+    if (mode == RefreshStatus.refreshing) {
+      _radialCtrl.repeat(period: const Duration(milliseconds: 500));
+    }
+  }
+
+  @override
+  Future<void> endRefresh() async {
+    final isCurrent = captureOperation();
+    _radialCtrl.reset();
+    await _dismissCtrl.animateTo(1,
+        duration: const Duration(milliseconds: 550));
+    if (isCurrent()) await super.endRefresh();
+  }
+
+  @override
+  Widget buildContent(BuildContext context, RefreshStatus? mode) {
+    return _BezierContent(
+      header: widget,
+      mode: mode,
+      bounce: _beizerBounceCtl,
+      dismiss: _bezierDismissCtl,
       child: SlideTransition(
         position: _disMissTween.animate(_dismissCtrl),
         child: AlignTransition(
-          child: widget.circleType == BezierCircleType.Progress
+          child: circleWidget.circleType == BezierCircleType.Progress
               ? Container(
-                  height: widget.circleRadius * 2 + 5,
+                  height: circleWidget.circleRadius * 2 + 5,
                   child: Stack(
                     children: <Widget>[
                       Center(
                         child: Container(
-                          height: widget.circleRadius * 2,
+                          height: circleWidget.circleRadius * 2,
                           decoration: BoxDecoration(
-                              color: widget.circleColor,
+                              color: circleWidget.circleColor,
                               shape: BoxShape.circle),
                         ),
                       ),
@@ -377,12 +412,13 @@ class _BezierCircleHeaderState extends State<BezierCircleHeader>
                         child: SizedBox(
                           child: CircularProgressIndicator(
                             valueColor: mode == RefreshStatus.refreshing
-                                ? AlwaysStoppedAnimation(widget.circleColor)
+                                ? AlwaysStoppedAnimation(
+                                    circleWidget.circleColor)
                                 : AlwaysStoppedAnimation(Colors.transparent),
                             strokeWidth: 2,
                           ),
-                          height: widget.circleRadius * 2 + 5,
-                          width: widget.circleRadius * 2 + 5,
+                          height: circleWidget.circleRadius * 2 + 5,
+                          width: circleWidget.circleRadius * 2 + 5,
                         ),
                       )
                     ],
@@ -391,12 +427,12 @@ class _BezierCircleHeaderState extends State<BezierCircleHeader>
               : AnimatedBuilder(
                   builder: (_, __) {
                     return Container(
-                      height: widget.circleRadius * 2,
+                      height: circleWidget.circleRadius * 2,
                       child: CustomPaint(
                         painter: _RaidalPainter(
                             value: _radialCtrl.value,
-                            circleColor: widget.circleColor,
-                            circleRadius: widget.circleRadius,
+                            circleColor: circleWidget.circleColor,
+                            circleRadius: circleWidget.circleRadius,
                             refreshing: mode == RefreshStatus.refreshing),
                       ),
                     );

@@ -83,8 +83,8 @@ class GifHeader1State extends RefreshIndicatorState<GifHeader1> {
   }
 }
 
-class GifFooter1 extends StatefulWidget {
-  GifFooter1() : super();
+class GifFooter1 extends LoadIndicator {
+  GifFooter1() : super(height: 80, loadStyle: LoadStyle.ShowWhenLoading);
 
   @override
   State<StatefulWidget> createState() {
@@ -92,50 +92,49 @@ class GifFooter1 extends StatefulWidget {
   }
 }
 
-class _GifFooter1State extends State<GifFooter1> {
+class _GifFooter1State extends LoadIndicatorState<GifFooter1> {
   final GifController _gifController = GifController();
   bool _loopLoadingFrames = false;
   Completer<void>? _endLoadingCompleter;
 
   @override
-  Widget build(BuildContext context) {
-    return CustomFooter(
-      height: 80,
-      builder: (context, mode) {
-        return GifView(
-          image: AssetImage("images/gifindicator1.gif"),
-          controller: _gifController,
-          autoPlay: false,
-          loop: false,
-          frameRate: 60,
-          onFrame: (frame) {
-            if (_loopLoadingFrames && frame >= 29) {
-              _gifController.seek(0);
-            } else if (_endLoadingCompleter != null && frame >= 59) {
-              _gifController.pause();
-              _endLoadingCompleter!.complete();
-              _endLoadingCompleter = null;
-            }
-          },
-          height: 80.0,
-          width: 537.0,
-        );
-      },
-      loadStyle: LoadStyle.ShowWhenLoading,
-      onModeChange: (mode) {
-        if (mode == LoadStatus.loading) {
-          _loopLoadingFrames = true;
+  void onModeChange(LoadStatus? mode) {
+    if (mode == LoadStatus.loading) {
+      _loopLoadingFrames = true;
+      _gifController.seek(0);
+      _gifController.play(initialFrame: 0);
+    }
+    super.onModeChange(mode);
+  }
+
+  @override
+  Future<void> endLoading() {
+    _loopLoadingFrames = false;
+    _endLoadingCompleter = Completer<void>();
+    _gifController.seek(30);
+    _gifController.play(initialFrame: 30);
+    return _endLoadingCompleter!.future;
+  }
+
+  @override
+  Widget buildContent(BuildContext context, LoadStatus? mode) {
+    return GifView(
+      image: const AssetImage('images/gifindicator1.gif'),
+      controller: _gifController,
+      autoPlay: false,
+      loop: false,
+      frameRate: 60,
+      onFrame: (frame) {
+        if (_loopLoadingFrames && frame >= 29) {
           _gifController.seek(0);
-          _gifController.play(initialFrame: 0);
+        } else if (_endLoadingCompleter != null && frame >= 59) {
+          _gifController.pause();
+          _endLoadingCompleter!.complete();
+          _endLoadingCompleter = null;
         }
       },
-      endLoading: () async {
-        _loopLoadingFrames = false;
-        _endLoadingCompleter = Completer<void>();
-        _gifController.seek(30);
-        _gifController.play(initialFrame: 30);
-        return _endLoadingCompleter!.future;
-      },
+      height: 80,
+      width: 537,
     );
   }
 

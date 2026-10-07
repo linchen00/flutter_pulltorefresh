@@ -48,7 +48,6 @@ class MaterialClassicHeader extends RefreshIndicator {
 
   @override
   State<StatefulWidget> createState() {
-
     return _MaterialClassicHeaderState();
   }
 }
@@ -84,7 +83,7 @@ class _MaterialClassicHeaderState
         upperBound: 1.0,
         duration: Duration(milliseconds: 300));
     _positionFactor = _positionController.drive(Tween<Offset>(
-        begin: Offset(0.0, -1.0), end: Offset(0.0, widget.height / 44.0)));
+        begin: Offset(0.0, -1.0), end: Offset(0.0, widget.height! / 44.0)));
     super.initState();
   }
 
@@ -107,8 +106,7 @@ class _MaterialClassicHeaderState
           alignment: Alignment.topCenter,
           child: RefreshProgressIndicator(
             semanticsLabel: widget.semanticsLabel ??
-                MaterialLocalizations.of(context)
-                    .refreshIndicatorSemanticLabel,
+                MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
             semanticsValue: widget.semanticsValue,
             value: floating ? null : _valueAni.value,
             valueColor: _valueColor,
@@ -131,7 +129,7 @@ class _MaterialClassicHeaderState
   @override
   void onModeChange(RefreshStatus? mode) {
     if (mode == RefreshStatus.refreshing) {
-      _positionController.value = widget.distance / widget.height;
+      _positionController.value = widget.distance / widget.height!;
       _scaleFactor.value = 1;
     }
     super.onModeChange(mode);
@@ -161,7 +159,7 @@ class _MaterialClassicHeaderState
 
   @override
   Future<void> readyToRefresh() {
-    return _positionController.animateTo(widget.distance / widget.height);
+    return _positionController.animateTo(widget.distance / widget.height!);
   }
 
   @override
@@ -247,7 +245,7 @@ class _WaterDropMaterialHeaderState extends _MaterialClassicHeaderState {
     _bezierController!.animateTo(1.5,
         curve: Curves.bounceOut, duration: Duration(milliseconds: 550));
     return _positionController
-        .animateTo(widget.distance / widget.height,
+        .animateTo(widget.distance / widget.height!,
             curve: Curves.bounceOut, duration: Duration(milliseconds: 550))
         .then((_) {
       _showWater = false;
@@ -303,7 +301,7 @@ class _WaterDropMaterialHeaderState extends _MaterialClassicHeaderState {
                 widget.backgroundColor ?? Theme.of(context).primaryColor),
             painter: _showWater
                 ? _WaterPainter(
-                    ratio: widget.distance / widget.height,
+                    ratio: widget.distance / widget.height!,
                     color: widget.backgroundColor ??
                         Theme.of(context).primaryColor,
                     listener: _positionFactor)

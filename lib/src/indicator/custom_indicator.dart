@@ -50,6 +50,7 @@ typedef Widget FooterBuilder(BuildContext context, LoadStatus? mode);
 ///
 /// [CustomFooter], a custom Indicator for footer
 class CustomHeader extends RefreshIndicator {
+  /// Builds content whose main-axis size is used when height is omitted.
   final HeaderBuilder builder;
 
   final VoidFutureCallBack? readyToRefresh;
@@ -70,7 +71,7 @@ class CustomHeader extends RefreshIndicator {
     this.onOffsetChange,
     this.onModeChange,
     this.onResetValue,
-    double height = 60.0,
+    double? height,
     Duration completeDuration = const Duration(milliseconds: 600),
     RefreshStyle refreshStyle = RefreshStyle.Follow,
   }) : super(
@@ -129,6 +130,7 @@ class _CustomHeaderState extends RefreshIndicatorState<CustomHeader> {
 ///
 /// [CustomHeader], a custom Indicator for header
 class CustomFooter extends LoadIndicator {
+  /// Builds content whose main-axis size is used when height is omitted.
   final FooterBuilder builder;
 
   final OffsetCallBack? onOffsetChange;
@@ -141,7 +143,7 @@ class CustomFooter extends LoadIndicator {
 
   const CustomFooter({
     Key? key,
-    double height = 60.0,
+    double? height,
     this.onModeChange,
     this.onOffsetChange,
     this.readyLoading,
@@ -149,11 +151,7 @@ class CustomFooter extends LoadIndicator {
     LoadStyle loadStyle = LoadStyle.ShowAlways,
     required this.builder,
     VoidCallback? onClick,
-  }) : super(
-            key: key,
-            onClick: onClick,
-            loadStyle: loadStyle,
-            height: height);
+  }) : super(key: key, onClick: onClick, loadStyle: loadStyle, height: height);
 
   @override
   State<StatefulWidget> createState() {
