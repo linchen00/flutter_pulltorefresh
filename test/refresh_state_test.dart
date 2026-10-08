@@ -7,8 +7,8 @@ void main() {
     addTearDown(state.dispose);
     final headers = <RefreshStatus>[];
     final footers = <LoadStatus>[];
-    state.headerMode!.addListener(() => headers.add(state.headerStatus!));
-    state.footerMode!.addListener(() => footers.add(state.footerStatus!));
+    state.headerMode.addListener(() => headers.add(state.headerStatus));
+    state.footerMode.addListener(() => footers.add(state.footerStatus));
 
     state.startRefresh();
     state.startRefresh();
@@ -40,14 +40,14 @@ void main() {
     ]);
   });
 
-  test('state fields retain existing declarations and assignment behavior', () {
+  test('state notifiers can be replaced with non-null notifiers', () {
     final state = RefreshState();
-    final original = state.headerMode!;
+    final original = state.headerMode;
     final replacement = RefreshNotifier(RefreshStatus.twoLeveling);
     state.headerMode = replacement;
     expect(state.headerMode, same(replacement));
     expect(state.isTwoLevel, isTrue);
-    state.headerMode!.value = RefreshStatus.twoLevelClosing;
+    state.headerMode.value = RefreshStatus.twoLevelClosing;
     expect(state.isTwoLevel, isTrue);
     state.refreshToIdle();
     expect(state.isTwoLevel, isFalse);
@@ -71,11 +71,19 @@ void main() {
 
   test('state disposal is independent and repeatable', () {
     final state = RefreshState();
+    final header = state.headerMode;
+    final footer = state.footerMode;
+    state.startRefresh();
+    state.startLoading();
     state.dispose();
     state.dispose();
     expect(state.isDisposed, isTrue);
-    expect(state.headerMode, isNull);
-    expect(state.footerMode, isNull);
+    expect(state.headerMode, same(header));
+    expect(state.footerMode, same(footer));
+    expect(() => header.addListener(() {}), throwsFlutterError);
+    expect(() => footer.addListener(() {}), throwsFlutterError);
+    expect(state.headerStatus, RefreshStatus.refreshing);
+    expect(state.footerStatus, LoadStatus.loading);
     expect(state.startRefresh, throwsStateError);
     expect(state.loadComplete, throwsStateError);
   });

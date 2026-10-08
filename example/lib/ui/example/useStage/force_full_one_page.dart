@@ -140,7 +140,7 @@ class _ForceFullExampleState extends State<ForceFullExample> {
         loadStyle: LoadStyle.ShowWhenLoading,
       ),
       child: FillEmptyCustomScrollView(
-        enableFillEmpty: _refreshState.footerMode!.value != LoadStatus.noMore,
+        enableFillEmpty: _refreshState.footerMode.value != LoadStatus.noMore,
         slivers: <Widget>[
           SliverToBoxAdapter(
             child: Text(

@@ -181,7 +181,7 @@ void main() {
       expect(state.headerStatus, RefreshStatus.idle);
       expect(tester.getTopLeft(find.text('Item 0')).dy, 0);
       expect(callbacks, 0);
-      state.headerMode!.value = RefreshStatus.refreshing;
+      state.headerMode.value = RefreshStatus.refreshing;
       await tester.pumpAndSettle();
       expect(find.text('refreshing').hitTestable(), findsOneWidget);
       state.refreshFailed();
@@ -213,7 +213,7 @@ void main() {
       final itemPosition = tester.getTopLeft(find.text('Item 4'));
 
       for (final status in RefreshStatus.values) {
-        state.headerMode!.value = status;
+        state.headerMode.value = status;
         await tester.pump();
         expect(
             find.text('header $status', skipOffstage: false), findsOneWidget);
@@ -223,7 +223,7 @@ void main() {
       }
       state.refreshToIdle();
       for (final status in LoadStatus.values) {
-        state.footerMode!.value = status;
+        state.footerMode.value = status;
         await tester.pump();
         expect(
             find.text('footer $status', skipOffstage: false), findsOneWidget);
@@ -395,11 +395,11 @@ void main() {
         findsOneWidget);
     expect(find.text('footer LoadStatus.loading', skipOffstage: false),
         findsOneWidget);
-    state.headerMode!.value = RefreshStatus.idle;
-    state.footerMode!.value = LoadStatus.idle;
+    state.headerMode.value = RefreshStatus.idle;
+    state.footerMode.value = LoadStatus.idle;
     await tester.pumpAndSettle();
-    state.headerMode!.value = RefreshStatus.refreshing;
-    state.footerMode!.value = LoadStatus.loading;
+    state.headerMode.value = RefreshStatus.refreshing;
+    state.footerMode.value = LoadStatus.loading;
     await tester.pumpAndSettle();
     expect(callbacks, 0);
   });
@@ -551,8 +551,8 @@ void main() {
     expect(first.isRefresh, isTrue);
     expect(second.headerStatus, RefreshStatus.idle);
     expect(second.footerStatus, LoadStatus.noMore);
-    expect(first.headerMode!.hasListeners, isFalse);
-    expect(first.footerMode!.hasListeners, isFalse);
+    expect(first.headerMode.hasListeners, isFalse);
+    expect(first.footerMode.hasListeners, isFalse);
     first.startLoading();
     first.refreshFailed();
     await tester.pumpAndSettle();

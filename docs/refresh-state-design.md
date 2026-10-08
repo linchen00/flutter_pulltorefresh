@@ -14,7 +14,7 @@
 - SmartRefresher 必须接收 RefreshState，RefreshController 改为可选。
 - RefreshController 保留 requestRefresh、requestTwoLevel、requestLoading、twoLevelComplete 四个操作。
 - 完成、失败、重置及状态查询归 RefreshState。
-- headerMode、footerMode 从 RefreshController 原样迁移到 RefreshState。
+- headerMode、footerMode 迁移到 RefreshState，类型非空；dispose 释放 notifier，但不将字段置空。
 - RefreshState 提供 startRefresh、startLoading，以支持脱离 UI 的完整业务生命周期。
 - startRefresh、startLoading 只更新状态和指示器，不触发 onRefresh、onLoading。
 - 手势或控制器主动请求才触发对应业务回调。
@@ -44,11 +44,11 @@ class RefreshState {
     LoadStatus? initialLoadStatus,
   });
 
-  RefreshNotifier<RefreshStatus>? headerMode;
-  RefreshNotifier<LoadStatus>? footerMode;
+  RefreshNotifier<RefreshStatus> headerMode;
+  RefreshNotifier<LoadStatus> footerMode;
 
-  RefreshStatus? get headerStatus;
-  LoadStatus? get footerStatus;
+  RefreshStatus get headerStatus;
+  LoadStatus get footerStatus;
 
   bool get isRefresh;
   bool get isLoading;
@@ -149,7 +149,7 @@ SmartRefresher(
 ```dart
 final state = RefreshState();
 
-state.footerMode!.addListener(() {
+state.footerMode.addListener(() {
   print(state.footerStatus);
 });
 
@@ -169,8 +169,8 @@ state.dispose();
 也可以直接更新 notifier：
 
 ```dart
-state.headerMode!.value = RefreshStatus.refreshing;
-state.footerMode!.value = LoadStatus.noMore;
+state.headerMode.value = RefreshStatus.refreshing;
+state.footerMode.value = LoadStatus.noMore;
 ```
 
 直接赋值允许使用方设置枚举中的任意状态，不自动校验完整的状态转换路径。需要驱动主动刷新、加载或二楼滚动流程时，仍通过控制器操作。

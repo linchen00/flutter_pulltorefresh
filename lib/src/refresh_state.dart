@@ -56,19 +56,18 @@ enum LoadStatus {
 /// or invoke business callbacks. A mounted header handles completion animations
 /// and returns completed or failed refreshes to idle when it retracts.
 class RefreshState {
-  RefreshNotifier<RefreshStatus>? headerMode;
-  RefreshNotifier<LoadStatus>? footerMode;
+  RefreshNotifier<RefreshStatus> headerMode;
+  RefreshNotifier<LoadStatus> footerMode;
   bool _disposed = false;
 
   RefreshState(
-      {RefreshStatus? initialRefreshStatus, LoadStatus? initialLoadStatus}) {
-    headerMode = RefreshNotifier(initialRefreshStatus ?? RefreshStatus.idle);
-    footerMode = RefreshNotifier(initialLoadStatus ?? LoadStatus.idle);
-  }
+      {RefreshStatus? initialRefreshStatus, LoadStatus? initialLoadStatus})
+      : headerMode = RefreshNotifier(initialRefreshStatus ?? RefreshStatus.idle),
+        footerMode = RefreshNotifier(initialLoadStatus ?? LoadStatus.idle);
 
   bool get isDisposed => _disposed;
-  RefreshStatus? get headerStatus => headerMode?.value;
-  LoadStatus? get footerStatus => footerMode?.value;
+  RefreshStatus get headerStatus => headerMode.value;
+  LoadStatus get footerStatus => footerMode.value;
   bool get isRefresh => headerStatus == RefreshStatus.refreshing;
   bool get isLoading => footerStatus == LoadStatus.loading;
   bool get isTwoLevel =>
@@ -83,58 +82,56 @@ class RefreshState {
   /// Updates the indicator without calling onRefresh or requesting scrolling.
   void startRefresh() {
     _checkActive();
-    headerMode?.value = RefreshStatus.refreshing;
+    headerMode.value = RefreshStatus.refreshing;
   }
 
   /// Updates the indicator without calling onLoading or requesting scrolling.
   void startLoading() {
     _checkActive();
-    footerMode?.value = LoadStatus.loading;
+    footerMode.value = LoadStatus.loading;
   }
 
   void refreshCompleted({bool resetFooterState = false}) {
     _checkActive();
-    headerMode?.value = RefreshStatus.completed;
+    headerMode.value = RefreshStatus.completed;
     if (resetFooterState) resetNoData();
   }
 
   void refreshFailed() {
     _checkActive();
-    headerMode?.value = RefreshStatus.failed;
+    headerMode.value = RefreshStatus.failed;
   }
 
   void refreshToIdle() {
     _checkActive();
-    headerMode?.value = RefreshStatus.idle;
+    headerMode.value = RefreshStatus.idle;
   }
 
   void loadComplete() {
     _checkActive();
-    footerMode?.value = LoadStatus.idle;
+    footerMode.value = LoadStatus.idle;
   }
 
   void loadFailed() {
     _checkActive();
-    footerMode?.value = LoadStatus.failed;
+    footerMode.value = LoadStatus.failed;
   }
 
   void loadNoData() {
     _checkActive();
-    footerMode?.value = LoadStatus.noMore;
+    footerMode.value = LoadStatus.noMore;
   }
 
   void resetNoData() {
     _checkActive();
-    if (footerStatus == LoadStatus.noMore) footerMode?.value = LoadStatus.idle;
+    if (footerStatus == LoadStatus.noMore) footerMode.value = LoadStatus.idle;
   }
 
   void dispose() {
     if (_disposed) return;
     _disposed = true;
-    headerMode?.dispose();
-    footerMode?.dispose();
-    headerMode = null;
-    footerMode = null;
+    headerMode.dispose();
+    footerMode.dispose();
   }
 }
 

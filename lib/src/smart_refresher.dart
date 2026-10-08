@@ -541,8 +541,6 @@ class SmartRefresherState extends State<SmartRefresher> {
       throw StateError('The requested indicator is unavailable.');
     final indicator = element.state as IndicatorStateMixin;
     final notifier = refresh ? state.headerMode : state.footerMode;
-    if (notifier == null)
-      throw StateError('The requested state notifier is unavailable.');
     final version = _bindingVersion;
     var changed = false;
     var published = false;
@@ -669,8 +667,6 @@ class SmartRefresherState extends State<SmartRefresher> {
     if (state.isTwoLevel || _requests.contains('twoLevel')) return;
     final version = _bindingVersion;
     final notifier = state.headerMode;
-    if (notifier == null)
-      throw StateError('The header state notifier is unavailable.');
     _requests.add('twoLevel');
     notifier.value = RefreshStatus.twoLevelOpening;
     var changed = false;
@@ -691,7 +687,7 @@ class SmartRefresherState extends State<SmartRefresher> {
           !changed &&
           identical(state.headerMode, notifier) &&
           state.headerStatus == RefreshStatus.twoLevelOpening) {
-        state.headerMode!.value = RefreshStatus.twoLeveling;
+        state.headerMode.value = RefreshStatus.twoLeveling;
       }
     } finally {
       notifier.removeListener(listen);
@@ -719,8 +715,6 @@ class SmartRefresherState extends State<SmartRefresher> {
         state.headerStatus == RefreshStatus.twoLevelClosing) return;
     final version = _bindingVersion;
     final notifier = state.headerMode;
-    if (notifier == null)
-      throw StateError('The header state notifier is unavailable.');
     notifier.value = RefreshStatus.twoLevelClosing;
     var changed = false;
     void listen() {

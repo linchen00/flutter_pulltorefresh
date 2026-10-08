@@ -124,9 +124,9 @@ void main() {
         initialRefreshStatus: RefreshStatus.idle,
         initialLoadStatus: LoadStatus.noMore);
 
-    expect(_refreshState.headerMode!.value, RefreshStatus.idle);
+    expect(_refreshState.headerMode.value, RefreshStatus.idle);
 
-    expect(_refreshState.footerMode!.value, LoadStatus.noMore);
+    expect(_refreshState.footerMode.value, LoadStatus.noMore);
   });
 
   testWidgets(
@@ -136,17 +136,17 @@ void main() {
         initialLoadStatus: LoadStatus.loading,
         initialRefreshStatus: RefreshStatus.refreshing);
     _refreshState.refreshCompleted(resetFooterState: true);
-    expect(_refreshState.footerMode!.value, LoadStatus.loading);
+    expect(_refreshState.footerMode.value, LoadStatus.loading);
 
-    _refreshState.headerMode!.value = RefreshStatus.refreshing;
-    _refreshState.footerMode!.value = LoadStatus.noMore;
+    _refreshState.headerMode.value = RefreshStatus.refreshing;
+    _refreshState.footerMode.value = LoadStatus.noMore;
     _refreshState.refreshCompleted(resetFooterState: true);
-    expect(_refreshState.footerMode!.value, LoadStatus.idle);
+    expect(_refreshState.footerMode.value, LoadStatus.idle);
 
-    _refreshState.headerMode!.value = RefreshStatus.refreshing;
-    _refreshState.footerMode!.value = LoadStatus.noMore;
+    _refreshState.headerMode.value = RefreshStatus.refreshing;
+    _refreshState.footerMode.value = LoadStatus.noMore;
     _refreshState.resetNoData();
-    expect(_refreshState.footerMode!.value, LoadStatus.idle);
+    expect(_refreshState.footerMode.value, LoadStatus.idle);
   });
 
   testRequestFun(true);

@@ -35,7 +35,7 @@ class _TwoLevelExampleState extends State<TwoLevelExample> {
 
   @override
   void initState() {
-    _refreshState1.headerMode?.addListener(() {
+    _refreshState1.headerMode.addListener(() {
       setState(() {});
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {

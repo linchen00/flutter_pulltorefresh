@@ -13,8 +13,8 @@ class StateRefreshExample extends StatefulWidget {
 class _StateRefreshExampleState extends State<StateRefreshExample> {
   final RefreshState _refreshState = RefreshState();
   late final Listenable _statusChanges = Listenable.merge([
-    _refreshState.headerMode!,
-    _refreshState.footerMode!,
+    _refreshState.headerMode,
+    _refreshState.footerMode,
   ]);
   int _refreshCallbacks = 0;
   int _loadingCallbacks = 0;
@@ -59,9 +59,9 @@ class _StateRefreshExampleState extends State<StateRefreshExample> {
                         'State 按钮不触发业务回调，也不自动滚动；'
                         '查看头部/底部时请滚动到对应位置。'),
                     const SizedBox(height: 8),
-                    Text('headerStatus: ${_refreshState.headerStatus!.name}',
+                    Text('headerStatus: ${_refreshState.headerStatus.name}',
                         key: const ValueKey('header-status')),
-                    Text('footerStatus: ${_refreshState.footerStatus!.name}',
+                    Text('footerStatus: ${_refreshState.footerStatus.name}',
                         key: const ValueKey('footer-status')),
                     Text('isRefresh: ${_refreshState.isRefresh}  '
                         'isLoading: ${_refreshState.isLoading}'),

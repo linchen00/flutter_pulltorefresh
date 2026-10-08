@@ -41,7 +41,7 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
         AnimationController(value: 0.0, vsync: this, upperBound: 1.0);
     _footerController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 2000));
-    _refreshState.headerMode!.addListener(() {
+    _refreshState.headerMode.addListener(() {
       if (_refreshState.headerStatus == RefreshStatus.idle) {
         _scaleController!.value = 0.0;
         _anicontroller!.reset();
@@ -130,7 +130,7 @@ class _CustomHeaderExampleState extends State<CustomHeaderExample>
         header: CustomHeader(
           refreshStyle: RefreshStyle.Behind,
           onOffsetChange: (offset) {
-            if (_refreshState.headerMode!.value != RefreshStatus.refreshing)
+            if (_refreshState.headerMode.value != RefreshStatus.refreshing)
               _scaleController!.value = offset / 80.0;
           },
           builder: (c, m) {

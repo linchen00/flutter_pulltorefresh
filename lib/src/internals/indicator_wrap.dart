@@ -658,9 +658,9 @@ mixin IndicatorStateMixin<T extends StatefulWidget, V> on State<T> {
     configuration = RefreshConfiguration.of(context);
     refresher = SmartRefresher.of(context);
     refresherState = SmartRefresher.ofState(context);
-    RefreshNotifier<V>? newMode = V == RefreshStatus
-        ? refresher!.state.headerMode as RefreshNotifier<V>?
-        : refresher!.state.footerMode as RefreshNotifier<V>?;
+    RefreshNotifier<V> newMode = V == RefreshStatus
+        ? refresher!.state.headerMode as RefreshNotifier<V>
+        : refresher!.state.footerMode as RefreshNotifier<V>;
     final ScrollPosition newPosition = Scrollable.of(context).position;
     final modeChanged = newMode != _mode;
     final bindingChanged = _boundVersion != refresherState!.bindingVersion;

@@ -130,7 +130,7 @@ class RefreshPhysics extends ScrollPhysics {
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     _resolveViewport();
-    if (refresherState!.widget.state.headerMode!.value ==
+    if (refresherState!.widget.state.headerMode.value ==
         RefreshStatus.twoLeveling) {
       if (offset > 0.0) {
         return parent!.applyPhysicsToUserOffset(position, offset);
@@ -143,13 +143,13 @@ class RefreshPhysics extends ScrollPhysics {
       }
     }
     if (position.outOfRange ||
-        refresherState!.widget.state.headerMode!.value ==
+        refresherState!.widget.state.headerMode.value ==
             RefreshStatus.twoLeveling) {
       final double overscrollPastStart =
           math.max(position.minScrollExtent - position.pixels, 0.0);
       final double overscrollPastEnd = math.max(
           position.pixels -
-              (refresherState!.widget.state.headerMode!.value ==
+              (refresherState!.widget.state.headerMode.value ==
                       RefreshStatus.twoLeveling
                   ? 0.0
                   : position.maxScrollExtent),
@@ -199,7 +199,7 @@ class RefreshPhysics extends ScrollPhysics {
     final bool enablePullUp = viewportRender == null
         ? false
         : viewportRender!.lastChild is RenderSliverLoading;
-    if (refresherState!.widget.state.headerMode!.value ==
+    if (refresherState!.widget.state.headerMode.value ==
         RefreshStatus.twoLeveling) {
       if (position.pixels - value > 0.0) {
         return parent!.applyBoundaryConditions(position, value);
@@ -344,7 +344,7 @@ class RefreshPhysics extends ScrollPhysics {
         );
       }
     }
-    if (refresherState!.widget.state.headerMode!.value ==
+    if (refresherState!.widget.state.headerMode.value ==
         RefreshStatus.twoLeveling) {
       if (velocity < 0.0) {
         return parent!.createBallisticSimulation(position, velocity);
@@ -356,7 +356,7 @@ class RefreshPhysics extends ScrollPhysics {
       }
     }
     if ((position.pixels > 0 &&
-            refresherState!.widget.state.headerMode!.value ==
+            refresherState!.widget.state.headerMode.value ==
                 RefreshStatus.twoLeveling) ||
         position.outOfRange) {
       return BouncingScrollSimulation(
@@ -365,7 +365,7 @@ class RefreshPhysics extends ScrollPhysics {
         // -1.0 avoid stop springing back ,and release gesture
         velocity: velocity * 0.91,
         leadingExtent: position.minScrollExtent,
-        trailingExtent: refresherState!.widget.state.headerMode!.value ==
+        trailingExtent: refresherState!.widget.state.headerMode.value ==
                 RefreshStatus.twoLeveling
             ? 0.0
             : position.maxScrollExtent,

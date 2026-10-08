@@ -48,8 +48,8 @@ class _TapButtonRefreshExampleState extends State<TapButtonRefreshExample> {
   @override
   void initState() {
     super.initState();
-    _refreshState.headerMode!.addListener(() {
-      if (_refreshState.headerMode!.value == RefreshStatus.idle) {
+    _refreshState.headerMode.addListener(() {
+      if (_refreshState.headerMode.value == RefreshStatus.idle) {
         Future.delayed(const Duration(milliseconds: 20)).then((value) {
           _enablePullDown = false;
           setState(() {});

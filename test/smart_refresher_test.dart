@@ -270,7 +270,7 @@ void main() {
     await tester.fling(find.byType(Viewport), const Offset(0, -1000), 3000);
     await tester.pumpAndSettle();
     expect(_refreshState.footerStatus, LoadStatus.loading);
-    _refreshState.footerMode!.value = LoadStatus.idle;
+    _refreshState.footerMode.value = LoadStatus.idle;
     await tester.pumpAndSettle();
     // test drag up
     _refreshController.position!
